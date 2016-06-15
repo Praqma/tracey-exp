@@ -30,14 +30,21 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import hudson.EnvVars;
 import hudson.Extension;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.BuildableItem;
 import hudson.model.Cause;
+import hudson.model.EnvironmentContributingAction;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -45,27 +52,51 @@ import org.kohsuke.stapler.DataBoundConstructor;
  *
  * @author Mads
  */
-public class TraceyTrigger extends Trigger<Job> {
+public class TraceyTrigger extends Trigger<AbstractProject<?,?>> {
 
+    private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = "tracey";
 
     @Override
-    public void start(Job project, boolean newInstance) {
+    public void start(final AbstractProject<?,?> project, boolean newInstance) {
         try {
             TraceyRabbitMQBrokerImpl p = new TraceyRabbitMQBrokerImpl();
             Channel c = p.setUpChannel(exchange);
-            p.setConsumer(new DefaultConsumer(c) {
+            Consumer cu = new DefaultConsumer(c) {
                 @Override
-                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
-                    if(asBuildable(job) != null) {
-                        asBuildable(job).scheduleBuild(new Cause.UserIdCause());
-                    }
+                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, final byte[] body) throws IOException {
+                    EnvironmentContributingAction action = new EnvironmentContributingAction() {
+                        @Override
+                        public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
+                            try {
+                                env.put("TRACEY_PAYLOAD", new String(body, "UTF-8"));
+                            } catch (UnsupportedEncodingException ex) {
+                                LOG.log(Level.SEVERE, "Error", ex);
+                            }
+                        }
+
+                        @Override
+                        public String getIconFileName() {
+                            return null;
+                        }
+
+                        @Override
+                        public String getDisplayName() {
+                            return null;
+                        }
+
+                        @Override
+                        public String getUrlName() {
+                            return null;
+                        }
+                    };
+                    project.scheduleBuild2(3, new Cause.UserIdCause(), action);
                 }
-            });
+            };
 
-            p.receive(exchange);
+            p.recieve(exchange, cu);
         } catch (Exception e) {
-
+            LOG.log(Level.SEVERE, "Error in triggering!", e);
         }
     }
 
