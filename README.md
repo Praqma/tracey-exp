@@ -1,4 +1,10 @@
-## Tracey experiement
+## Tracey experiment
+
+### Install dependencies
+
+Install the dependencies described in [tracey-cli](https://github.com/Praqma/tracey-cli) (Core and Broker)
+
+### FIXME - I'm Getting this error
 
 Currently doesn't work quite as expected...
 
