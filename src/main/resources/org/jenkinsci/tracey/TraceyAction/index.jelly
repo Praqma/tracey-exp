@@ -1,8 +1,8 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
 
-    <f:entry field="exchange" title="Exchange">
-        <f:textbox default="tracey"/>
-    </f:entry>
+<h3>Tracey metadata</h3>
+
+${it.metadata}
 
 </j:jelly>

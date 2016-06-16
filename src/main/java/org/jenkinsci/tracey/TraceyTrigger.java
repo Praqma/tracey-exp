@@ -23,26 +23,13 @@
  */
 package org.jenkinsci.tracey;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
-import hudson.EnvVars;
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildableItem;
-import hudson.model.Cause;
-import hudson.model.EnvironmentContributingAction;
 import hudson.model.Item;
-import hudson.model.Job;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
@@ -56,56 +43,37 @@ public class TraceyTrigger extends Trigger<AbstractProject<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = "tracey";
+    private transient ExecutorService es = Executors.newFixedThreadPool(1);
+
+    class TraceyAsyncListener implements Runnable {
+
+        AbstractProject<?,?> project;
+        String exchange;
+
+        public TraceyAsyncListener(final String exchange, final AbstractProject<?,?> project ) {
+            this.project = project;
+            this.exchange = exchange;
+        }
+
+        @Override
+        public void run() {
+            try {
+                TraceyRabbitMQBrokerImpl p = new TraceyRabbitMQBrokerImpl();
+                p.getReceiver().setHandler(new TraceyBuildStarter(project));
+                p.receive(exchange);
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, "Error in triggering!", e);
+            }
+        }
+    }
 
     @Override
     public void start(final AbstractProject<?,?> project, boolean newInstance) {
-        try {
-            TraceyRabbitMQBrokerImpl p = new TraceyRabbitMQBrokerImpl();
-            Channel c = p.setUpChannel(exchange);
-            Consumer cu = new DefaultConsumer(c) {
-                @Override
-                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, final byte[] body) throws IOException {
-                    EnvironmentContributingAction action = new EnvironmentContributingAction() {
-                        @Override
-                        public void buildEnvVars(AbstractBuild<?, ?> build, EnvVars env) {
-                            try {
-                                env.put("TRACEY_PAYLOAD", new String(body, "UTF-8"));
-                            } catch (UnsupportedEncodingException ex) {
-                                LOG.log(Level.SEVERE, "Error", ex);
-                            }
-                        }
-
-                        @Override
-                        public String getIconFileName() {
-                            return null;
-                        }
-
-                        @Override
-                        public String getDisplayName() {
-                            return null;
-                        }
-
-                        @Override
-                        public String getUrlName() {
-                            return null;
-                        }
-                    };
-                    project.scheduleBuild2(3, new Cause.UserIdCause(), action);
-                }
-            };
-
-            p.recieve(exchange, cu);
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Error in triggering!", e);
+        if(newInstance) {
+            es.submit(new TraceyAsyncListener(exchange, project));
         }
     }
 
-    private <T extends Item> BuildableItem asBuildable(T j) {
-        if(j instanceof BuildableItem) {
-            return (BuildableItem)j;
-        }
-        return null;
-    }
 
     @DataBoundConstructor
     public TraceyTrigger(String exchange) {
@@ -126,6 +94,13 @@ public class TraceyTrigger extends Trigger<AbstractProject<?,?>> {
         this.exchange = exchange;
     }
 
+    @Override
+    public TraceyTriggerDescriptor getDescriptor() {
+        return (TraceyTriggerDescriptor)super.getDescriptor();
+    }
+
+
+
     @Extension
     public static class TraceyTriggerDescriptor extends TriggerDescriptor {
 
@@ -138,5 +113,6 @@ public class TraceyTrigger extends Trigger<AbstractProject<?,?>> {
         public String getDisplayName() {
             return "Tracey Trigger";
         }
+
     }
 }
