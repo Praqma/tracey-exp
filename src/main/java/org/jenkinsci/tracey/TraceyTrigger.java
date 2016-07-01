@@ -34,6 +34,7 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.security.ACL;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -52,7 +53,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * @author Mads
  */
-public class TraceyTrigger extends Trigger<AbstractProject<?,?>> {
+public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = "tracey";
@@ -93,13 +94,13 @@ public class TraceyTrigger extends Trigger<AbstractProject<?,?>> {
     //public TraceyRabbitMQBrokerImpl(String host, String password, String user, ExchangeType type, String exchange) {
     class TraceyAsyncListener implements Runnable {
 
-        AbstractProject<?,?> project;
+        Job<?,?> project;
         String exchange = "tracey";
         String username = "guest";
         String password = "guest";
         String host = "locahost";
 
-        public TraceyAsyncListener(final String exchange, final AbstractProject<?,?> project, String username, String password, String host) {
+        public TraceyAsyncListener(final String exchange, final Job<?,?> project, String username, String password, String host) {
             this.project = project;
             this.exchange = exchange;
             if(username != null && !username.trim().isEmpty())
@@ -122,7 +123,7 @@ public class TraceyTrigger extends Trigger<AbstractProject<?,?>> {
     }
 
     @Override
-    public void start(final AbstractProject<?,?> project, boolean newInstance) {
+    public void start(final Job<?,?> project, boolean newInstance) {
         System.out.println("CREDNTIAL ID == "+credentialId);
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(StandardCredentials.class, project, ACL.SYSTEM,
