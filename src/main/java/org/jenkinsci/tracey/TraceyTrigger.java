@@ -1,26 +1,3 @@
-/*
- * The MIT License
- *
- * Copyright 2016 Mads.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package org.jenkinsci.tracey;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
@@ -31,7 +8,6 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.Extension;
-import hudson.model.AbstractProject;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
@@ -44,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
@@ -62,6 +39,8 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     private TraceyRabbitMQBrokerImpl.ExchangeType type = TraceyRabbitMQBrokerImpl.ExchangeType.FANOUT;
 
     private transient ExecutorService es = Executors.newFixedThreadPool(1);
+    private transient Future<TraceyAsyncListener> listener;
+
 
     /**
      * @return the credentialId
@@ -122,9 +101,14 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         }
     }
 
+    /**
+     * Called when the Project is saved.
+     * @param project
+     * @param newInstance
+     */
     @Override
     public void start(final Job<?,?> project, boolean newInstance) {
-        System.out.println("CREDNTIAL ID == "+credentialId);
+        super.start(project, newInstance);
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(StandardCredentials.class, project, ACL.SYSTEM,
                 Collections.<DomainRequirement>emptyList()), CredentialsMatchers.withId(credentialId));
@@ -134,14 +118,24 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         if(newInstance) {
             if(es != null) {
                 if(upw != null) {
-                    es.submit(new TraceyAsyncListener(exchange, project, upw.getUsername(), Secret.toString(upw.getPassword()), host));
+                    listener = (Future<TraceyAsyncListener>)es.submit(new TraceyAsyncListener(exchange, project, upw.getUsername(), Secret.toString(upw.getPassword()), host));
                 } else {
-                    es.submit(new TraceyAsyncListener(exchange, project, null, null, host));
+                    listener = (Future<TraceyAsyncListener>)es.submit(new TraceyAsyncListener(exchange, project, null, null, host));
                 }
             }
         }
 
     }
+
+    /**
+     * Called when the project is recofigured as well. So when saved stop() -> start()
+     */
+    @Override
+    public void stop() {
+        super.stop(); //To change body of generated methods, choose Tools | Templates.
+        listener.cancel(true);
+    }
+
 
 
     @DataBoundConstructor
