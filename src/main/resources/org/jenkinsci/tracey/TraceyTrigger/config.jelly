@@ -1,8 +1,16 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local" xmlns:c="/lib/credentials">
 
     <f:entry field="exchange" title="Exchange">
-        <f:textbox default="tracey"/>
+        <f:textbox default="${descriptor.DEFAULT_EXCHANGE}"/>
+    </f:entry>
+
+    <f:entry field="host" title="Host">
+        <f:textbox default="${descriptor.DEFAULT_HOST}"/>
+    </f:entry>
+
+    <f:entry title="Credentials" field="credentialId">
+        <c:select/>
     </f:entry>
 
 </j:jelly>

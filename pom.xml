@@ -21,6 +21,10 @@
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
+	<repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -39,9 +43,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.praqma.tracey</groupId>
-            <artifactId>broker</artifactId>
-            <version>1.0-drop0</version>
+            <groupId>com.github.Praqma</groupId>
+            <artifactId>tracey-broker</artifactId>
+            <version>master-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.rabbitmq</groupId>
@@ -54,6 +58,13 @@
             <artifactId>commons-lang3</artifactId>
             <version>${commons.lang3.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+            <version>1.28</version>
+        </dependency>
+
     </dependencies>
 
 </project>
