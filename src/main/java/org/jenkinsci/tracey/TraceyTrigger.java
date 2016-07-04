@@ -16,20 +16,17 @@ import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.praqma.tracey.broker.TraceyIOError;
+import net.praqma.tracey.broker.TraceyValidatorError;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-/**
- * @author Mads
- */
 public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
@@ -37,10 +34,10 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     private String host = "localhost";
     private String credentialId;
     private TraceyRabbitMQBrokerImpl.ExchangeType type = TraceyRabbitMQBrokerImpl.ExchangeType.FANOUT;
-
-    private transient ExecutorService es = Executors.newFixedThreadPool(1);
-    private transient Future<TraceyAsyncListener> listener;
-
+    private String username = "guest";
+    private String password = "guest";
+    private String consumerTag;
+    private transient TraceyRabbitMQBrokerImpl broker;
 
     /**
      * @return the credentialId
@@ -70,36 +67,6 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         this.host = host;
     }
 
-    //public TraceyRabbitMQBrokerImpl(String host, String password, String user, ExchangeType type, String exchange) {
-    class TraceyAsyncListener implements Runnable {
-
-        Job<?,?> project;
-        String exchange = "tracey";
-        String username = "guest";
-        String password = "guest";
-        String host = "locahost";
-
-        public TraceyAsyncListener(final String exchange, final Job<?,?> project, String username, String password, String host) {
-            this.project = project;
-            this.exchange = exchange;
-            if(username != null && !username.trim().isEmpty())
-                this.username = username;
-            if(password != null && !password.trim().isEmpty())
-                this.password = password;
-            this.host = host;
-        }
-
-        @Override
-        public void run() {
-            try {
-                TraceyRabbitMQBrokerImpl p = new TraceyRabbitMQBrokerImpl(host, password, username, type, exchange);
-                p.getReceiver().setHandler(new TraceyBuildStarter(project));
-                p.receive(exchange);
-            } catch (Exception e) {
-                LOG.log(Level.SEVERE, "Error in triggering!", e);
-            }
-        }
-    }
 
     /**
      * Called when the Project is saved.
@@ -112,28 +79,39 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         StandardCredentials credentials = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(StandardCredentials.class, project, ACL.SYSTEM,
                 Collections.<DomainRequirement>emptyList()), CredentialsMatchers.withId(credentialId));
-
         UsernamePasswordCredentials upw = (UsernamePasswordCredentials)credentials;
 
-        if(newInstance) {
-            if(es != null) {
-                if(upw != null) {
-                    listener = (Future<TraceyAsyncListener>)es.submit(new TraceyAsyncListener(exchange, project, upw.getUsername(), Secret.toString(upw.getPassword()), host));
-                } else {
-                    listener = (Future<TraceyAsyncListener>)es.submit(new TraceyAsyncListener(exchange, project, null, null, host));
-                }
-            }
+        if(upw != null) {
+            broker = new TraceyRabbitMQBrokerImpl(host, Secret.toString(upw.getPassword()), upw.getUsername(), type, exchange);
+        } else {
+            broker = new TraceyRabbitMQBrokerImpl(host, password, username, type, exchange);
+        }
+
+        broker.getReceiver().setHandler(new TraceyBuildStarter(project));
+        
+        try {
+            consumerTag = broker.receive(getExchange());
+        } catch (TraceyValidatorError ex) {
+            LOG.log(Level.INFO, "Failed to validate", ex);
+        } catch (TraceyIOError ex) {
+            LOG.log(Level.SEVERE, "IOError caught", ex);
         }
 
     }
 
     /**
-     * Called when the project is recofigured as well. So when saved stop() -> start()
+     * Called when the project is reconfigured as well. So when saved stop() -> start()
      */
     @Override
     public void stop() {
-        super.stop(); //To change body of generated methods, choose Tools | Templates.
-        listener.cancel(true);
+        try {
+            super.stop();
+            //Cancel the consumer that is on the old consumer. We create a new one
+            //for every job saved.
+            broker.getReceiver().cancel(consumerTag);
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, "Failed to stop consumer", ex);
+        }
     }
 
 
