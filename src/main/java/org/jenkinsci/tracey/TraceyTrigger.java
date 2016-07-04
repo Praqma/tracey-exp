@@ -11,6 +11,7 @@ import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Job;
+import hudson.model.TaskListener;
 import hudson.security.ACL;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -88,8 +89,9 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         }
 
         broker.getReceiver().setHandler(new TraceyBuildStarter(project));
-        
+
         try {
+
             consumerTag = broker.receive(getExchange());
         } catch (TraceyValidatorError ex) {
             LOG.log(Level.INFO, "Failed to validate", ex);
@@ -140,6 +142,20 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     @Override
     public TraceyTriggerDescriptor getDescriptor() {
         return (TraceyTriggerDescriptor)super.getDescriptor();
+    }
+
+    /**
+     * @return the consumerTag
+     */
+    public String getConsumerTag() {
+        return consumerTag;
+    }
+
+    /**
+     * @param consumerTag the consumerTag to set
+     */
+    public void setConsumerTag(String consumerTag) {
+        this.consumerTag = consumerTag;
     }
 
     @Extension
