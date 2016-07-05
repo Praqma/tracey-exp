@@ -58,9 +58,9 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             upw = (UsernamePasswordCredentials)credentials;
         }
 
-
         final Jenkins jenkins = Jenkins.getActiveInstance();
-        EnvVars env = null;
+        EnvVars env = new EnvVars();
+
         try {
             env = project.getEnvironment(jenkins, TaskListener.NULL);
         } catch (IOException ex) {
@@ -68,6 +68,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         } catch (InterruptedException ex) {
             LOG.log(Level.SEVERE, "InterruptedException caught", ex);
         }
+
         if(upw != null) {
             broker = new TraceyRabbitMQBrokerImpl(env.expand(th.getHost()),
                     Secret.toString(upw.getPassword()), upw.getUsername(), type, env.expand(exchange));
