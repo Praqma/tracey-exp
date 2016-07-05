@@ -3,13 +3,11 @@ package org.jenkinsci.tracey;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Item;
-import hudson.model.ItemGroup;
 import hudson.model.Job;
 import hudson.model.TaskListener;
 import hudson.security.ACL;
@@ -22,51 +20,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jenkins.model.GlobalConfiguration;
+import jenkins.model.Jenkins;
 import net.praqma.tracey.broker.TraceyIOError;
 import net.praqma.tracey.broker.TraceyValidatorError;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
-import org.kohsuke.stapler.AncestorInPath;
+import org.jenkinsci.tracey.TraceyHost.TraceyHostDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = "tracey";
-    private String host = "localhost";
-    private String credentialId;
     private TraceyRabbitMQBrokerImpl.ExchangeType type = TraceyRabbitMQBrokerImpl.ExchangeType.FANOUT;
     private String username = "guest";
     private String password = "guest";
     private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
-
-    /**
-     * @return the credentialId
-     */
-    public String getCredentialId() {
-        return credentialId;
-    }
-
-    /**
-     * @param credentialId the credentialId to set
-     */
-    public void setCredentialId(String credentialId) {
-        this.credentialId = credentialId;
-    }
-
-    /**
-     * @return the host
-     */
-    public String getHost() {
-        return host;
-    }
-
-    /**
-     * @param host the host to set
-     */
-    public void setHost(String host) {
-        this.host = host;
-    }
+    private String traceyHost;
 
 
     /**
@@ -77,21 +48,37 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     @Override
     public void start(final Job<?,?> project, boolean newInstance) {
         super.start(project, newInstance);
-        StandardCredentials credentials = CredentialsMatchers.firstOrNull(
-                CredentialsProvider.lookupCredentials(StandardCredentials.class, project, ACL.SYSTEM,
-                Collections.<DomainRequirement>emptyList()), CredentialsMatchers.withId(credentialId));
-        UsernamePasswordCredentials upw = (UsernamePasswordCredentials)credentials;
+        TraceyHost th = TraceyGlobalConfig.getById(traceyHost);
+        UsernamePasswordCredentials upw = null;
 
+        if(th != null) {
+            StandardCredentials credentials = CredentialsMatchers.firstOrNull(
+                    CredentialsProvider.lookupCredentials(StandardCredentials.class, project, ACL.SYSTEM,
+                    Collections.<DomainRequirement>emptyList()), CredentialsMatchers.withId(th.getCredentialId()));
+            upw = (UsernamePasswordCredentials)credentials;
+        }
+
+
+        final Jenkins jenkins = Jenkins.getActiveInstance();
+        EnvVars env = null;
+        try {
+            env = project.getEnvironment(jenkins, TaskListener.NULL);
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, "IOException caught", ex);
+        } catch (InterruptedException ex) {
+            LOG.log(Level.SEVERE, "InterruptedException caught", ex);
+        }
         if(upw != null) {
-            broker = new TraceyRabbitMQBrokerImpl(host, Secret.toString(upw.getPassword()), upw.getUsername(), type, exchange);
+            broker = new TraceyRabbitMQBrokerImpl(env.expand(th.getHost()),
+                    Secret.toString(upw.getPassword()), upw.getUsername(), type, env.expand(exchange));
         } else {
-            broker = new TraceyRabbitMQBrokerImpl(host, password, username, type, exchange);
+            broker = new TraceyRabbitMQBrokerImpl(TraceyHostDescriptor.DEFAULT_HOST,
+                    env.expand(password), env.expand(username), type, env.expand(exchange));
         }
 
         broker.getReceiver().setHandler(new TraceyBuildStarter(project));
 
         try {
-
             consumerTag = broker.receive(getExchange());
         } catch (TraceyValidatorError ex) {
             LOG.log(Level.INFO, "Failed to validate", ex);
@@ -116,13 +103,10 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         }
     }
 
-
-
     @DataBoundConstructor
-    public TraceyTrigger(String exchange, String credentialId, String host) {
+    public TraceyTrigger(String exchange, String traceyHost) {
         this.exchange = exchange;
-        this.credentialId = credentialId;
-        this.host = host;
+        this.traceyHost = traceyHost;
     }
 
     /**
@@ -158,10 +142,24 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         this.consumerTag = consumerTag;
     }
 
+    /**
+     * @return the traceyHost
+     */
+    public String getTraceyHost() {
+        return traceyHost;
+    }
+
+    /**
+     * @param traceyHost the traceyHost to set
+     */
+    public void setTraceyHost(String traceyHost) {
+        this.traceyHost = traceyHost;
+    }
+
     @Extension
     public static class TraceyTriggerDescriptor extends TriggerDescriptor {
 
-        public static final String DEFAULT_HOST = "localhost";
+
         public static final String DEFAULT_EXCHANGE = "tracey";
 
         @Override
@@ -174,14 +172,15 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             return "Tracey Trigger";
         }
 
-        public ListBoxModel doFillCredentialIdItems(final @AncestorInPath ItemGroup<?> context) {
-            final List<StandardCredentials> credentials = CredentialsProvider.lookupCredentials(StandardCredentials.class, context, ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
-
-            return new StandardListBoxModel()
-                    .withEmptySelection()
-                    .withMatching(CredentialsMatchers.anyOf(
-                            CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class)
-                    ), credentials);
+        public ListBoxModel doFillTraceyHostItems() {
+            ListBoxModel model = new ListBoxModel();
+            List<TraceyHost> hosts = GlobalConfiguration.all().get(TraceyGlobalConfig.class).getConfiguredHosts();
+            if(hosts != null) {
+                for(TraceyHost th : hosts) {
+                    model.add(th.getDescription(), th.getCredentialId());
+                }
+            }
+            return model;
         }
 
     }
