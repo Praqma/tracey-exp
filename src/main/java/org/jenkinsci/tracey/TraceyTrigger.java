@@ -27,16 +27,19 @@ import net.praqma.tracey.broker.TraceyValidatorError;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
 import org.jenkinsci.tracey.TraceyHost.TraceyHostDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = "tracey";
-    private TraceyRabbitMQBrokerImpl.ExchangeType type = TraceyRabbitMQBrokerImpl.ExchangeType.FANOUT;
+    private TraceyRabbitMQBrokerImpl.ExchangeType type = TraceyRabbitMQBrokerImpl.ExchangeType.TOPIC;
     private String username = "guest";
     private String password = "guest";
     private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
+    private boolean injectEnvironment = false;
+    private String envKey = "TRACEY_PAYLOAD";
     private String traceyHost;
 
 
@@ -77,7 +80,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
                     env.expand(password), env.expand(username), type, env.expand(exchange));
         }
 
-        broker.getReceiver().setHandler(new TraceyBuildStarter(project));
+        broker.getReceiver().setHandler(new TraceyBuildStarter(project, envKey, injectEnvironment));
 
         try {
             consumerTag = broker.receive(getExchange());
@@ -157,11 +160,41 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         this.traceyHost = traceyHost;
     }
 
+    /**
+     * @return the injectEnvironment
+     */
+    public boolean isInjectEnvironment() {
+        return injectEnvironment;
+    }
+
+    /**
+     * @param injectEnvironment the injectEnvironment to set
+     */
+    @DataBoundSetter
+    public void setInjectEnvironment(boolean injectEnvironment) {
+        this.injectEnvironment = injectEnvironment;
+    }
+
+    /**
+     * @return the envKey
+     */
+    public String getEnvKey() {
+        return envKey;
+    }
+
+    /**
+     * @param envKey the envKey to set
+     */
+    @DataBoundSetter
+    public void setEnvKey(String envKey) {
+        this.envKey = envKey;
+    }
+
     @Extension
     public static class TraceyTriggerDescriptor extends TriggerDescriptor {
 
-
         public static final String DEFAULT_EXCHANGE = "tracey";
+        public static final String DEFAULT_ENV_NAME = "TRACEY_PAYLOAD";
 
         @Override
         public boolean isApplicable(Item item) {
