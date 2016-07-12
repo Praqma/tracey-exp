@@ -22,7 +22,7 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
     @Override
     public void buildEnvironmentFor(Run r, EnvVars envs, TaskListener listener) throws IOException, InterruptedException {
         super.buildEnvironmentFor(r, envs, listener); //To change body of generated methods, choose Tools | Templates.
-        LOG.info("Started Tracey enviroment for job: "+r.getParent().getName());
+        LOG.info("Started Tracey environment for job: "+r.getParent().getName());
         TraceyAction tAction = r.getAction(TraceyAction.class);
         TraceyTrigger t = findTriggerForRun(r);
         if (t != null) {
