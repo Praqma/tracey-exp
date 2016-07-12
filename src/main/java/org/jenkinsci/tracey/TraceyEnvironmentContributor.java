@@ -40,7 +40,7 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
                         String commitId = git.getString("commitId");
                         String repoUri = git.getString("repoUri");
 
-                        envs.put("GIT_COMMIT", commitId);
+                        envs.put("GIT_COMMIT_TRACEY", commitId);
                         envs.put("GIT_BRANCH_TRACEY", branch);
                         envs.put("GIT_URL_TRACEY", repoUri);
                         envs.put("GIT_REPO_NAME_TRACEY", repoName);
