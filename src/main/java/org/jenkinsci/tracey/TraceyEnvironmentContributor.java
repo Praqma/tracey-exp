@@ -63,6 +63,7 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
                     return (TraceyTrigger)trigs;
                 }
             }
+            LOG.info("No TraceyTrigger found in job: "+r.getParent().getName());
         } else {
             LOG.info("Trigger project not compatible");
         }
