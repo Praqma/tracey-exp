@@ -9,10 +9,13 @@
         <f:select/>
     </f:entry>
 
-        <f:optionalBlock field="injectEnvironment" title="Add payload to environment" inline="true">
-            <f:entry field="envKey" title="Environment key">
-                <f:textbox default="${descriptor.DEFAULT_ENV_NAME}"/>
-            </f:entry>
-        </f:optionalBlock>
+    <f:optionalBlock field="injectEnvironment" title="Add payload to environment" inline="true">
+        <f:entry field="envKey" title="Environment key">
+            <f:textbox default="${descriptor.DEFAULT_ENV_NAME}"/>
+        </f:entry>
+        <f:entry field="gitReady" title="Inject variables for Git Plugin">
+            <f:checkbox/>
+        </f:entry>
+    </f:optionalBlock>
 
 </j:jelly>

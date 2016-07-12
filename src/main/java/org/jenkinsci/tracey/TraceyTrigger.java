@@ -39,6 +39,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
     private boolean injectEnvironment = false;
+    private boolean gitReady;
     private String envKey = "TRACEY_PAYLOAD";
     private String traceyHost;
 
@@ -79,8 +80,9 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             broker = new TraceyRabbitMQBrokerImpl(TraceyHostDescriptor.DEFAULT_HOST,
                     env.expand(password), env.expand(username), type, env.expand(exchange));
         }
-
-        broker.getReceiver().setHandler(new TraceyBuildStarter(project, envKey, injectEnvironment));
+        TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey);
+        LOG.info(tbs.toString());
+        broker.getReceiver().setHandler(tbs);
 
         try {
             consumerTag = broker.receive(getExchange());
@@ -108,9 +110,12 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     }
 
     @DataBoundConstructor
-    public TraceyTrigger(String exchange, String traceyHost) {
+    public TraceyTrigger(String exchange, String traceyHost, boolean injectEnvironment, boolean gitReady, String envKey) {
         this.exchange = exchange;
         this.traceyHost = traceyHost;
+        this.injectEnvironment = injectEnvironment;
+        this.gitReady = gitReady;
+        this.envKey = envKey;
     }
 
     /**
@@ -170,7 +175,6 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     /**
      * @param injectEnvironment the injectEnvironment to set
      */
-    @DataBoundSetter
     public void setInjectEnvironment(boolean injectEnvironment) {
         this.injectEnvironment = injectEnvironment;
     }
@@ -188,6 +192,20 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     @DataBoundSetter
     public void setEnvKey(String envKey) {
         this.envKey = envKey;
+    }
+
+    /**
+     * @return the gitReady
+     */
+    public boolean isGitReady() {
+        return gitReady;
+    }
+
+    /**
+     * @param gitReady the gitReady to set
+     */
+    public void setGitReady(boolean gitReady) {
+        this.gitReady = gitReady;
     }
 
     @Extension

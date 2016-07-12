@@ -6,6 +6,7 @@ import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Job;
 import java.io.IOException;
+import java.util.logging.Logger;
 import jenkins.model.ParameterizedJobMixIn;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQMessageHandler;
 
@@ -15,14 +16,14 @@ import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQMessageHandler;
  */
 public class TraceyBuildStarter implements TraceyRabbitMQMessageHandler {
 
+    private static final Logger LOG = Logger.getLogger(TraceyBuildStarter.class.getName());
+
     private Job<?,?> project;
     private String envKey;
-    private boolean shouldContribute;
 
-    public TraceyBuildStarter(final Job<?,?> project, String envKey, boolean shouldContribute) {
+    public TraceyBuildStarter(final Job<?,?> project, String envKey) {
         this.project = project;
         this.envKey = envKey;
-        this.shouldContribute = shouldContribute;
     }
 
     @Override
@@ -33,7 +34,18 @@ public class TraceyBuildStarter implements TraceyRabbitMQMessageHandler {
                 return project;
             }
         };
-
-        jobMix.scheduleBuild2(3, new CauseAction(new Cause.UserIdCause()), new TraceyAction(new String(bytes, "UTF-8"), envKey, shouldContribute));
+        TraceyAction tAction = new TraceyAction(new String(bytes, "UTF-8"), envKey);
+        LOG.info("Tracey Action added for job "+project.getName());
+        LOG.info(tAction.toString());
+        jobMix.scheduleBuild2(3, new CauseAction(new Cause.UserIdCause()), tAction);
     }
+
+    @Override
+    public String toString() {
+        return String.format("TraceyBuildStarter[envKey = %s, project = %s]",
+                envKey,
+                project.getName());
+    }
+
+
 }
