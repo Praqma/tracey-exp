@@ -2,7 +2,6 @@ package org.jenkinsci.tracey;
 
 import static jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import hudson.EnvVars;
-import hudson.Extension;
 import hudson.model.EnvironmentContributor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -34,7 +33,6 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
                 if(t.isGitReady()) {
                     JSONObject git = TraceyEiffelMessageValidator.getGitIdentifier(tAction.getMetadata());
                     if (git != null) {
-
                         String branch = git.getString("branch");
                         String repoName = git.getString("repoName");
                         String commitId = git.getString("commitId");
