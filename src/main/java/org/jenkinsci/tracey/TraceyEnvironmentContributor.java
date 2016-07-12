@@ -2,6 +2,7 @@ package org.jenkinsci.tracey;
 
 import static jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import hudson.EnvVars;
+import hudson.Extension;
 import hudson.model.EnvironmentContributor;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -15,6 +16,7 @@ import net.praqma.tracey.broker.rabbitmq.TraceyEiffelMessageValidator;
  * I decided to go with an environment contributor instead of an action for workflow compatability
  * See this: http://stackoverflow.com/questions/31326286/can-a-workflow-step-access-environment-variables-provided-by-an-environmentcontr
  */
+@Extension
 public class TraceyEnvironmentContributor extends EnvironmentContributor {
 
     private static final Logger LOG = Logger.getLogger(TraceyEnvironmentContributor.class.getName());
