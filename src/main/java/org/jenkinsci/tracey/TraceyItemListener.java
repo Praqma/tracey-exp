@@ -48,7 +48,7 @@ public class TraceyItemListener extends ItemListener {
                 if(t instanceof TraceyTrigger) {
                     TraceyTrigger tt = (TraceyTrigger)t;
                     tt.stop();
-                    LOG.info("Stopped TraceyTrigger for job: "+mixin.getName());
+                    LOG.info(String.format("Stopped TraceyTrigger for job: %s", mixin.getName()));
                 }
             }
         }

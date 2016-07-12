@@ -23,36 +23,26 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
 
     @Override
     public void buildEnvironmentFor(Run r, EnvVars envs, TaskListener listener) throws IOException, InterruptedException {
-        super.buildEnvironmentFor(r, envs, listener); //To change body of generated methods, choose Tools | Templates.
-        LOG.info("Started Tracey environment for job: "+r.getParent().getName());
+        super.buildEnvironmentFor(r, envs, listener);
+        LOG.info(String.format("Started Tracey environment for job: %s", r.getParent().getName()));
         TraceyAction tAction = r.getAction(TraceyAction.class);
         TraceyTrigger t = findTriggerForRun(r);
         if (t != null) {
-            LOG.info("Contributing tracey environment for job "+r.getParent().getName());
             if(t.isInjectEnvironment() && tAction != null) {
-                LOG.info("Contributed environment with key: "+tAction.getEnvKey());
+                LOG.info(String.format("Contributed environment with key: %s", tAction.getEnvKey()));
                 envs.put(tAction.getEnvKey(), tAction.getMetadata());
-
 
                 if(t.isGitReady()) {
                     JSONObject git = TraceyEiffelMessageValidator.getGitIdentifier(tAction.getMetadata());
                     if (git != null) {
-                        String branch = git.getString("branch");
-                        String repoName = git.getString("repoName");
-                        String commitId = git.getString("commitId");
-                        String repoUri = git.getString("repoUri");
-
-                        envs.put("GIT_COMMIT_TRACEY", commitId);
-                        envs.put("GIT_BRANCH_TRACEY", branch);
-                        envs.put("GIT_URL_TRACEY", repoUri);
-                        envs.put("GIT_REPO_NAME_TRACEY", repoName);
-
-                        LOG.info("GIT_COMMIT_TRACEY = "+commitId);
-                        LOG.info("GIT_BRANCH_TRACEY= "+branch);
-                        LOG.info("GIT_URL_TRACEY= "+repoUri);
-                        LOG.info("GIT_REPO_TRACEY = "+repoName);
+                        envs.put("GIT_COMMIT_TRACEY", git.getString("commitId"));
+                        envs.put("GIT_BRANCH_TRACEY", git.getString("branch"));
+                        envs.put("GIT_URL_TRACEY", git.getString("repoUri"));
+                        envs.put("GIT_REPO_NAME_TRACEY", git.getString("repoName"));
                     }
                 }
+            } else {
+                LOG.info("Tracey environment contribution disabled");
             }
         }
     }
@@ -65,7 +55,7 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
                     return (TraceyTrigger)trigs;
                 }
             }
-            LOG.info("No TraceyTrigger found in job: "+r.getParent().getName());
+            LOG.info(String.format("No TraceyTrigger found in job: %s", r.getParent().getName()));
         } else {
             LOG.info("Trigger project not compatible");
         }
