@@ -2,17 +2,18 @@ package org.jenkinsci.tracey.filter;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
-import net.praqma.tracey.broker.rabbitmq.TraceyEventTypeFilter;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class EiffelSourceChangeCreatedOption extends EiffelEventTypeOption {
+
+    static private String FILTER_CLASS = "EiffelSourceChangeCreatedEvent";
 
     @DataBoundConstructor
     public EiffelSourceChangeCreatedOption() { }
 
     @Override
     public String getFilterClassName() {
-        return TraceyEventTypeFilter.getClassNameForEiffelSourceChangeCreatedEvent();
+        return FILTER_CLASS;
     }
 
     @Override
@@ -30,7 +31,7 @@ public class EiffelSourceChangeCreatedOption extends EiffelEventTypeOption {
          */
         @Override
         public String getDisplayName() {
-            return TraceyEventTypeFilter.getClassNameForEiffelSourceChangeCreatedEvent().split("\\$")[1];
+            return FILTER_CLASS;
         }
 
     }

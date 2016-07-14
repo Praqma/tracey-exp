@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.github.Praqma</groupId>
             <artifactId>tracey-broker</artifactId>
-            <version>drop2</version>
+            <version>master-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.rabbitmq</groupId>

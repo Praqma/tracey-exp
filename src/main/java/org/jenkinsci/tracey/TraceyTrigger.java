@@ -63,29 +63,8 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     public void start(final Job<?,?> project, boolean newInstance) {
         super.start(project, newInstance);
 
-        TraceyHost th = TraceyGlobalConfig.getById(traceyHost);
-        UsernamePasswordCredentials upw = getCredentials(th, project);
-        String tHost = th.getHost();
+        broker = configureBroker(project, traceyHost, type, exchange);
 
-        final Jenkins jenkins = Jenkins.getActiveInstance();
-        EnvVars env = new EnvVars();
-
-        try {
-            env = project.getEnvironment(jenkins, TaskListener.NULL);
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, "IOException caught", ex);
-        } catch (InterruptedException ex) {
-            LOG.log(Level.SEVERE, "InterruptedException caught", ex);
-        }
-
-        if(upw != null) {
-            broker = new TraceyRabbitMQBrokerImpl(env.expand(tHost),
-                    Secret.toString(upw.getPassword()), upw.getUsername(), type, env.expand(exchange));
-        } else {
-            broker = new TraceyRabbitMQBrokerImpl(TraceyHostDescriptor.DEFAULT_HOST,
-                    env.expand(TraceyTriggerDescriptor.DEFAULT_PASSWORD), env.expand(TraceyTriggerDescriptor.DEFAULT_USER),
-                    type, env.expand(exchange));
-        }
         TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey, filters);
         LOG.info(tbs.toString());
         if(filters != null) {
@@ -116,6 +95,33 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             upw = (UsernamePasswordCredentials)credentials;
         }
         return upw;
+    }
+
+    private TraceyRabbitMQBrokerImpl configureBroker(Job<?,?> proj, String hid, TraceyRabbitMQBrokerImpl.ExchangeType t, String exch) {
+        TraceyHost th = TraceyGlobalConfig.getById(hid);
+        UsernamePasswordCredentials upw = getCredentials(th, proj);
+        String tHost = th.getHost();
+
+        final Jenkins jenkins = Jenkins.getActiveInstance();
+        EnvVars env = new EnvVars();
+
+        try {
+            env = proj.getEnvironment(jenkins, TaskListener.NULL);
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, "IOException caught", ex);
+        } catch (InterruptedException ex) {
+            LOG.log(Level.SEVERE, "InterruptedException caught", ex);
+        }
+
+        if(upw != null) {
+            broker = new TraceyRabbitMQBrokerImpl(env.expand(tHost),
+                    Secret.toString(upw.getPassword()), upw.getUsername(), t, env.expand(exch));
+        } else {
+            broker = new TraceyRabbitMQBrokerImpl(TraceyHostDescriptor.DEFAULT_HOST,
+                    env.expand(TraceyTriggerDescriptor.DEFAULT_PASSWORD), env.expand(TraceyTriggerDescriptor.DEFAULT_USER),
+                    t, env.expand(exch));
+        }
+        return broker;
     }
 
     /**

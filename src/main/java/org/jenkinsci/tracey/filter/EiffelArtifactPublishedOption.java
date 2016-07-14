@@ -21,36 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.jenkinsci.tracey;
+package org.jenkinsci.tracey.filter;
 
-import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import org.junit.Test;
+import hudson.Extension;
+import hudson.model.Descriptor;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  *
  * @author Mads
  */
-public class EiffelPayloadRegexTest {
+public class EiffelArtifactPublishedOption extends EiffelEventTypeOption {
 
-    @Test
-    public void accept() {
-        String msg = "mads is cool";
-        EiffelPayloadRegexFilter madsFilter = new EiffelPayloadRegexFilter(".*mads.*");
-        String response =  madsFilter.postReceive(msg);
-        assertNotNull(response);
-        assertEquals("mads is cool", response);
+    private static String FILTER_CLASS = "EiffelArtifactPublishedEvent";
+
+    @DataBoundConstructor
+    public EiffelArtifactPublishedOption() { }
+
+    @Override
+    public String getFilterClassName() {
+        return FILTER_CLASS;
     }
 
-    @Test
-    public void reject() {
-        String msg = "reject this message";
-        EiffelPayloadRegexFilter madsFilter = new EiffelPayloadRegexFilter(".*mads.*");
-        String response =  madsFilter.postReceive(msg);
-        assertNull(response);
+    @Override
+    public Descriptor<EiffelEventTypeOption> getDescriptor() {
+        return new EiffelArtifactPublishedOptionDescriptor();
     }
 
+    @Extension
+    public static class EiffelArtifactPublishedOptionDescriptor extends Descriptor<EiffelEventTypeOption> {
+
+        @Override
+        public String getDisplayName() {
+            return FILTER_CLASS;
+        }
+
+    }
 
 }

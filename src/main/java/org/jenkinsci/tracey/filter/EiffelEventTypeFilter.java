@@ -72,5 +72,4 @@ public class EiffelEventTypeFilter extends TraceyEventTypeFilter implements Desc
         }
 
     }
-
 }
