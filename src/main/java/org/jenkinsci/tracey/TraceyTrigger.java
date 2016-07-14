@@ -7,6 +7,7 @@ import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.model.Job;
 import hudson.model.TaskListener;
@@ -16,6 +17,7 @@ import hudson.triggers.TriggerDescriptor;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -24,25 +26,33 @@ import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.praqma.tracey.broker.TraceyIOError;
 import net.praqma.tracey.broker.TraceyValidatorError;
+import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
+import net.sf.json.JSONObject;
 import org.jenkinsci.tracey.TraceyHost.TraceyHostDescriptor;
+import org.jenkinsci.tracey.filter.EiffelEventTypeFilter.EiffelEventTypeFilterDescriptor;
+import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter.EiffelPayloadRegexFilterDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.StaplerRequest;
 
 public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = "tracey";
     private TraceyRabbitMQBrokerImpl.ExchangeType type = TraceyRabbitMQBrokerImpl.ExchangeType.TOPIC;
-    private String username = "guest";
-    private String password = "guest";
     private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
-    private boolean injectEnvironment = false;
-    private boolean gitReady;
+
     private String envKey = "TRACEY_PAYLOAD";
     private String traceyHost;
 
+    //TODO: This should be part of a build wrapper
+    private boolean injectEnvironment = false;
+    private boolean gitReady;
+
+    //Post recieve fileters
+    private List<TraceyFilter> filters = new ArrayList<TraceyFilter>();
 
     /**
      * Called when the Project is saved.
@@ -52,15 +62,10 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     @Override
     public void start(final Job<?,?> project, boolean newInstance) {
         super.start(project, newInstance);
-        TraceyHost th = TraceyGlobalConfig.getById(traceyHost);
-        UsernamePasswordCredentials upw = null;
 
-        if(th != null) {
-            StandardCredentials credentials = CredentialsMatchers.firstOrNull(
-                    CredentialsProvider.lookupCredentials(StandardCredentials.class, project, ACL.SYSTEM,
-                    Collections.<DomainRequirement>emptyList()), CredentialsMatchers.withId(th.getCredentialId()));
-            upw = (UsernamePasswordCredentials)credentials;
-        }
+        TraceyHost th = TraceyGlobalConfig.getById(traceyHost);
+        UsernamePasswordCredentials upw = getCredentials(th, project);
+        String tHost = th.getHost();
 
         final Jenkins jenkins = Jenkins.getActiveInstance();
         EnvVars env = new EnvVars();
@@ -74,14 +79,22 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         }
 
         if(upw != null) {
-            broker = new TraceyRabbitMQBrokerImpl(env.expand(th.getHost()),
+            broker = new TraceyRabbitMQBrokerImpl(env.expand(tHost),
                     Secret.toString(upw.getPassword()), upw.getUsername(), type, env.expand(exchange));
         } else {
             broker = new TraceyRabbitMQBrokerImpl(TraceyHostDescriptor.DEFAULT_HOST,
-                    env.expand(password), env.expand(username), type, env.expand(exchange));
+                    env.expand(TraceyTriggerDescriptor.DEFAULT_PASSWORD), env.expand(TraceyTriggerDescriptor.DEFAULT_USER),
+                    type, env.expand(exchange));
         }
-        TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey);
+        TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey, filters);
         LOG.info(tbs.toString());
+        if(filters != null) {
+            LOG.info(String.format("Filters for job %s", project.getName()));
+            for(TraceyFilter ft : filters) {
+                LOG.info(ft.getClass().getSimpleName());
+            }
+            broker.getReceiver().getFilters().addAll(filters);
+        }
         broker.getReceiver().setHandler(tbs);
 
         try {
@@ -92,6 +105,17 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             LOG.log(Level.SEVERE, "IOError caught", ex);
         }
 
+    }
+
+    private UsernamePasswordCredentials getCredentials(TraceyHost h, Job<?,?> j) {
+        UsernamePasswordCredentials upw = null;
+        if(h != null) {
+            StandardCredentials credentials = CredentialsMatchers.firstOrNull(
+                    CredentialsProvider.lookupCredentials(StandardCredentials.class, j, ACL.SYSTEM,
+                    Collections.<DomainRequirement>emptyList()), CredentialsMatchers.withId(h.getCredentialId()));
+            upw = (UsernamePasswordCredentials)credentials;
+        }
+        return upw;
     }
 
     /**
@@ -110,12 +134,13 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     }
 
     @DataBoundConstructor
-    public TraceyTrigger(String exchange, String traceyHost, boolean injectEnvironment, boolean gitReady, String envKey) {
+    public TraceyTrigger(String exchange, String traceyHost, boolean injectEnvironment, boolean gitReady, String envKey, List<TraceyFilter> filters) {
         this.exchange = exchange;
         this.traceyHost = traceyHost;
         this.injectEnvironment = injectEnvironment;
         this.gitReady = gitReady;
         this.envKey = envKey;
+        this.filters = filters;
     }
 
     /**
@@ -208,11 +233,31 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         this.gitReady = gitReady;
     }
 
+    /**
+     * @return the filters
+     */
+    public List<TraceyFilter> getFilters() {
+        return filters;
+    }
+
+    /**
+     * @param filters the filters to set
+     */
+    public void setFilters(List<TraceyFilter> filters) {
+        this.filters = filters;
+    }
+
     @Extension
     public static class TraceyTriggerDescriptor extends TriggerDescriptor {
 
         public static final String DEFAULT_EXCHANGE = "tracey";
+        public static final String DEFAULT_USER = "guest";
+        public static final String DEFAULT_PASSWORD = "guest";
         public static final String DEFAULT_ENV_NAME = "TRACEY_PAYLOAD";
+
+        public TraceyTriggerDescriptor() {
+            load();
+        }
 
         @Override
         public boolean isApplicable(Item item) {
@@ -222,6 +267,12 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         @Override
         public String getDisplayName() {
             return "Tracey Trigger";
+        }
+
+
+        @Override
+        public Trigger<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            return super.newInstance(req, formData); //To change body of generated methods, choose Tools | Templates.
         }
 
         public ListBoxModel doFillTraceyHostItems() {
@@ -235,6 +286,12 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             return model;
         }
 
+        public static List<Descriptor> getFilters() {
+            List<Descriptor> descriptorz = new ArrayList<Descriptor>();
+            descriptorz.add(Jenkins.getActiveInstance().getDescriptorByType(EiffelPayloadRegexFilterDescriptor.class));
+            descriptorz.add(Jenkins.getActiveInstance().getDescriptorByType(EiffelEventTypeFilterDescriptor.class));
+            return descriptorz;
+        }
     }
 
 }

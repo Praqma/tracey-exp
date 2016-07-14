@@ -24,12 +24,12 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
     @Override
     public void buildEnvironmentFor(Run r, EnvVars envs, TaskListener listener) throws IOException, InterruptedException {
         super.buildEnvironmentFor(r, envs, listener);
-        LOG.info(String.format("Started Tracey environment for job: %s", r.getParent().getName()));
         TraceyAction tAction = r.getAction(TraceyAction.class);
         TraceyTrigger t = findTriggerForRun(r);
         if (t != null) {
             if(t.isInjectEnvironment() && tAction != null) {
                 LOG.info(String.format("Contributed environment with key: %s", tAction.getEnvKey()));
+                LOG.info(String.format("Contributed environment with value: %s", tAction.getMetadata()));
                 envs.put(tAction.getEnvKey(), tAction.getMetadata());
 
                 if(t.isGitReady()) {
@@ -55,9 +55,9 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
                     return (TraceyTrigger)trigs;
                 }
             }
-            LOG.info(String.format("No TraceyTrigger found in job: %s", r.getParent().getName()));
         } else {
-            LOG.info("Trigger project not compatible");
+            LOG.info(String.format("Trigger project not compatible for project type %s",
+                    r.getParent().getClass().getSimpleName()));
         }
         return null;
     }

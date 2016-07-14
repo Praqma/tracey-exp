@@ -18,4 +18,8 @@
         </f:entry>
     </f:optionalBlock>
 
+    <f:entry title="Filters" field="filters">
+        <f:hetero-list descriptors="${descriptor.getFilters()}" items="${instance.filters}" name="filters" oneach="true" hasHeader="true"/>
+    </f:entry>
+
 </j:jelly>

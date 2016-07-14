@@ -1,0 +1,6 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
+         <f:entry field="regex" title="Regular expression">
+            <f:textbox default="${descriptor.DEFAULT_REGEX}"/>
+        </f:entry>
+</j:jelly>
