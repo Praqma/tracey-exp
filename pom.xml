@@ -43,11 +43,11 @@
     </licenses>
 
     <dependencies>
-        
+
         <dependency>
             <groupId>com.github.Praqma</groupId>
             <artifactId>tracey-broker</artifactId>
-            <version>4d566ef1a8</version>
+            <version>3bcd977912</version>
         </dependency>
 
         <dependency>

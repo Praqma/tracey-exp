@@ -60,8 +60,8 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     /**
      * Called when the Project is saved.
-     * @param project
-     * @param newInstance
+     * @param project The current project/job to which this trigger belongs
+     * @param newInstance is this trigger just being added? true/false
      */
     @Override
     public void start(final Job<?,?> project, boolean newInstance) {
@@ -128,15 +128,10 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         return broker;
     }
 
-    /**
-     * Called when the project is reconfigured as well. So when saved stop() -> start()
-     */
     @Override
     public void stop() {
         try {
             super.stop();
-            //Cancel the consumer that is on the old consumer. We create a new one
-            //for every job saved.
             broker.getReceiver().cancel(consumerTag);
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, "Failed to stop consumer", ex);
