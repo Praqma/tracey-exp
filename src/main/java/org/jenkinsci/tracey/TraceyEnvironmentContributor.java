@@ -17,8 +17,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.json.JSONObject;
 import net.praqma.tracey.broker.rabbitmq.TraceyEiffelMessageValidator;
-import org.apache.commons.lang3.StringUtils;
-
+import org.apache.commons.lang.StringUtils;
 /**
  * I decided to go with an environment contributor instead of an action for workflow compatability
  * See this: http://stackoverflow.com/questions/31326286/can-a-workflow-step-access-environment-variables-provided-by-an-environmentcontr
