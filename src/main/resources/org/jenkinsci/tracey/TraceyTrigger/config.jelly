@@ -16,10 +16,14 @@
         <f:entry field="gitReady" title="Inject variables for Git Plugin">
             <f:checkbox/>
         </f:entry>
+        <f:entry field="regexToEnv" title="Add payloads to environment">
+            <f:expandableTextbox/>
+        </f:entry>
     </f:optionalBlock>
 
     <f:entry title="Filters" field="filters">
         <f:hetero-list descriptors="${descriptor.getFilters()}" items="${instance.filters}" name="filters" oneach="true" hasHeader="true"/>
     </f:entry>
+
 
 </j:jelly>

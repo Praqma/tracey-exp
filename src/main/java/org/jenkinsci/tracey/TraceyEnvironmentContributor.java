@@ -8,9 +8,16 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.triggers.Trigger;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import org.json.JSONObject;
 import net.praqma.tracey.broker.rabbitmq.TraceyEiffelMessageValidator;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * I decided to go with an environment contributor instead of an action for workflow compatability
@@ -30,7 +37,16 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
             if(t.isInjectEnvironment() && tAction != null) {
                 LOG.info(String.format("Contributed environment with key: %s", tAction.getEnvKey()));
                 LOG.info(String.format("Contributed environment with value: %s", tAction.getMetadata()));
+
                 envs.put(tAction.getEnvKey(), tAction.getMetadata());
+
+                try {
+                    HashMap<String,Pattern> p = validateRegex(t.getRegexToEnv());
+                    LOG.info(String.format("Found %s valid patterns", p.size()));
+                    envs.putAll(findEnvValues(p, tAction.getMetadata()));
+                } catch (PatternSyntaxException ex) {
+                    LOG.log(Level.WARNING, "Syntax error in regex detected", ex);
+                }
 
                 if(t.isGitReady()) {
                     JSONObject git = TraceyEiffelMessageValidator.getGitIdentifier(tAction.getMetadata());
@@ -61,4 +77,36 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
         }
         return null;
     }
+
+    public static HashMap<String,Pattern> validateRegex(String regex) throws PatternSyntaxException {
+        HashMap<String,Pattern> p = new HashMap<String, Pattern>();
+        if(!StringUtils.isBlank(regex)) {
+            String[] lines = regex.split("[\\r\\n]+");
+            LOG.fine(String.format("Found %s lines in configuration", lines.length));
+            for(String line : lines) {
+                String[] comp = line.split("\\s");
+                if(comp.length == 2) {
+                    String key = comp[0];
+                    String rx = comp[1];
+                    Pattern pat = Pattern.compile(rx);
+                    LOG.fine(String.format("Added regex %s", pat));
+                    p.put(key, pat);
+                }
+            }
+        }
+        return p;
+    }
+
+    public static HashMap<String,String> findEnvValues(HashMap<String,Pattern> patterns, String payload) {
+        HashMap<String,String> envValues = new HashMap<String, String>();
+        for(Entry<String,Pattern> s : patterns.entrySet()) {
+            Matcher m = s.getValue().matcher(payload);
+            while(m.find()) {
+                envValues.put(s.getKey(), m.group(1));
+                break;
+            }
+        }
+        return envValues;
+    }
+
 }

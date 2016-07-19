@@ -2,6 +2,7 @@ package org.jenkinsci.tracey;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.ShutdownSignalException;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Job;
@@ -28,6 +29,16 @@ public class TraceyBuildStarter implements TraceyRabbitMQMessageHandler {
         this.project = project;
         this.envKey = envKey;
         this.filter = filter;
+    }
+
+    @Override
+    public void handleCancel(String consumerTag) throws IOException {
+        LOG.info(String.format("Tracey called handleCancel for %s", consumerTag));
+    }
+
+    @Override
+    public void handleShutdownSignal(String consumerTag, ShutdownSignalException sig) {
+        LOG.info(String.format("Tracey called handleShutdownSignal for %s", consumerTag));
     }
 
     @Override

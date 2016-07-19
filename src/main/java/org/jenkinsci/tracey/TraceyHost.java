@@ -31,12 +31,14 @@ public class TraceyHost implements Describable<TraceyHost> {
     private String host;
     private String credentialId;
     private String description;
+    private int traceyPort = 5672;
 
     @DataBoundConstructor
-    public TraceyHost(String host, String credentialId, String description) {
+    public TraceyHost(String host, String credentialId, String description, int traceyPort) {
         this.credentialId = credentialId;
         this.host = host;
         this.description = description;
+        this.traceyPort = traceyPort;
     }
 
     @Override
@@ -86,11 +88,26 @@ public class TraceyHost implements Describable<TraceyHost> {
         this.description = description;
     }
 
+    /**
+     * @return the traceyPort
+     */
+    public int getTraceyPort() {
+        return traceyPort;
+    }
+
+    /**
+     * @param traceyPort the traceyPort to set
+     */
+    public void setTraceyPort(int traceyPort) {
+        this.traceyPort = traceyPort;
+    }
+
 
     @Extension
     public static class TraceyHostDescriptor extends Descriptor<TraceyHost> {
 
         public static final String DEFAULT_HOST = "localhost";
+        public static final int DEFAULT_PORT = 5672;
 
         @Override
         public String getDisplayName() {

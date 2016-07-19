@@ -8,6 +8,10 @@
         <f:textbox default="${descriptor.DEFAULT_HOST}"/>
     </f:entry>
 
+    <f:entry field="traceyPort" title="Port">
+        <f:textbox default="${descriptor.DEFAULT_PORT}"/>
+    </f:entry>
+
     <f:entry title="Credentials" field="credentialId">
         <c:select/>
     </f:entry>

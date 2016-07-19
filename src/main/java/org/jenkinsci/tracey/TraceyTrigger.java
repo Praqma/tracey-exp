@@ -14,12 +14,15 @@ import hudson.model.TaskListener;
 import hudson.security.ACL;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.QuotedStringTokenizer;
 import hudson.util.Secret;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.GlobalConfiguration;
@@ -29,11 +32,13 @@ import net.praqma.tracey.broker.TraceyValidatorError;
 import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.tracey.TraceyHost.TraceyHostDescriptor;
 import org.jenkinsci.tracey.filter.EiffelEventTypeFilter.EiffelEventTypeFilterDescriptor;
 import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter.EiffelPayloadRegexFilterDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 public class TraceyTrigger extends Trigger<Job<?,?>> {
@@ -53,6 +58,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     //Post recieve fileters
     private List<TraceyFilter> filters = new ArrayList<TraceyFilter>();
+    private String regexToEnv;
 
     /**
      * Called when the Project is saved.
@@ -115,7 +121,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         if(upw != null) {
             broker = new TraceyRabbitMQBrokerImpl(env.expand(tHost),
-                    Secret.toString(upw.getPassword()), upw.getUsername(), t, env.expand(exch));
+                    Secret.toString(upw.getPassword()), upw.getUsername(), t, env.expand(exch), th.getTraceyPort());
         } else {
             broker = new TraceyRabbitMQBrokerImpl(TraceyHostDescriptor.DEFAULT_HOST,
                     env.expand(TraceyTriggerDescriptor.DEFAULT_PASSWORD), env.expand(TraceyTriggerDescriptor.DEFAULT_USER),
@@ -253,6 +259,21 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         this.filters = filters;
     }
 
+    /**
+     * @return the regexToEnv
+     */
+    public String getRegexToEnv() {
+        return regexToEnv;
+    }
+
+    /**
+     * @param regexToEnv the regexToEnv to set
+     */
+    @DataBoundSetter
+    public void setRegexToEnv(String regexToEnv) {
+        this.regexToEnv = regexToEnv;
+    }
+
     @Extension
     public static class TraceyTriggerDescriptor extends TriggerDescriptor {
 
@@ -298,6 +319,21 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             descriptorz.add(Jenkins.getActiveInstance().getDescriptorByType(EiffelEventTypeFilterDescriptor.class));
             return descriptorz;
         }
+
+        public FormValidation doCheckRegexToEnv(@QueryParameter String regexToEnv) {
+            if(!StringUtils.isBlank(regexToEnv)) {
+                String[] lines = regexToEnv.split("[\\r\\n]+");
+                for(String line : lines) {
+                    String[] comp = line.split("\\s");
+                    if(comp.length == 2) {
+                        String key = comp[0];
+                        String regex = comp[1];
+                    }
+                }
+            }
+            return FormValidation.ok();
+        }
+
     }
 
 }
