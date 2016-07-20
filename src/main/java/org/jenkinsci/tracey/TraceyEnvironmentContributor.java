@@ -4,6 +4,7 @@ import static jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.EnvironmentContributor;
+import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.triggers.Trigger;
@@ -15,6 +16,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import javax.annotation.CheckForNull;
 import org.json.JSONObject;
 import net.praqma.tracey.broker.rabbitmq.TraceyEiffelMessageValidator;
 import org.apache.commons.lang.StringUtils;
@@ -33,15 +35,18 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
         TraceyAction tAction = r.getAction(TraceyAction.class);
         TraceyTrigger t = findTriggerForRun(r);
         if (t != null) {
-            if(t.isInjectEnvironment() && tAction != null) {
-                LOG.info(String.format("Contributed environment with key: %s", tAction.getEnvKey()));
-                LOG.info(String.format("Contributed environment with value: %s", tAction.getMetadata()));
+            if(tAction == null) {
+                LOG.info(String.format("No action defined for job %s", r.getParent().getName()));
+            }
 
+            if(t.isInjectEnvironment() && tAction != null) {
+                LOG.info(String.format("Contributed environment [%s, %s] for job %s", tAction.getEnvKey(),
+                        tAction.getMetadata(),
+                        r.getParent().getName()));
                 envs.put(tAction.getEnvKey(), tAction.getMetadata());
 
                 try {
                     HashMap<String,Pattern> p = validateRegex(t.getRegexToEnv());
-                    LOG.info(String.format("Found %s valid patterns", p.size()));
                     envs.putAll(findEnvValues(p, tAction.getMetadata()));
                 } catch (PatternSyntaxException ex) {
                     LOG.log(Level.WARNING, "Syntax error in regex detected", ex);
@@ -57,11 +62,12 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
                     }
                 }
             } else {
-                LOG.info("Tracey environment contribution disabled");
+                LOG.info(String.format("Tracey environment contribution disabled for job %s (%s)", r.getParent().getName(), r.getParent().getClass().getSimpleName()));
             }
         }
     }
 
+    @CheckForNull
     private TraceyTrigger findTriggerForRun(Run r) {
         if (r.getParent() instanceof ParameterizedJob) {
             ParameterizedJob jobP = (ParameterizedJob)r.getParent();

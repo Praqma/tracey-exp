@@ -22,10 +22,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-/**
- *
- * @author Mads
- */
 public class TraceyHost implements Describable<TraceyHost> {
 
     private String host;

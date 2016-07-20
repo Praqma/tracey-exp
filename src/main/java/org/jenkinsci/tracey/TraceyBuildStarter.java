@@ -9,6 +9,7 @@ import hudson.model.Job;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
+import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQMessageHandler;
 import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
@@ -61,14 +62,12 @@ public class TraceyBuildStarter implements TraceyRabbitMQMessageHandler {
                 shouldSpawnJob &= response;
             }
         } else {
-            LOG.info("No filters for job "+project.getName());
+            LOG.info(String.format("No filters for job %s", project.getName()));
         }
 
         if(shouldSpawnJob) {
             TraceyAction tAction = new TraceyAction(new String(bytes, "UTF-8"), envKey);
-            LOG.info(String.format("Tracey Action added for job %s",project.getName()));
-            LOG.info(tAction.toString());
-            jobMix.scheduleBuild2(3, new CauseAction(new Cause.UserIdCause()), tAction);
+            jobMix.scheduleBuild2(Jenkins.getInstance().getQuietPeriod(), new CauseAction(new Cause.UserIdCause()), tAction);
         }
     }
 

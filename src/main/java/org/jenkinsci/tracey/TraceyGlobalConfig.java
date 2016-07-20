@@ -7,10 +7,6 @@ import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-/**
- *
- * @author Mads
- */
 @Extension
 public class TraceyGlobalConfig extends GlobalConfiguration {
 

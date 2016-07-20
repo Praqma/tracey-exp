@@ -14,7 +14,7 @@
         <f:entry field="envKey" title="Environment key">
             <f:textbox default="${descriptor.DEFAULT_ENV_NAME}"/>
         </f:entry>
-        <f:entry field="gitReady" title="Inject variables for Git Plugin">
+        <f:entry field="gitReady" title="Inject variables for Git Plugin" description="NOTE: This requires that the message recieved is a valid EiffelSourceChangeCreatedEvent json">
             <f:checkbox/>
         </f:entry>
         <f:entry field="regexToEnv" title="Add payloads to environment">

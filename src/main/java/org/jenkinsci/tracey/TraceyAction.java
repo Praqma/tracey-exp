@@ -2,10 +2,6 @@ package org.jenkinsci.tracey;
 
 import hudson.model.Action;
 
-/**
- *
- * @author Mads
- */
 public class TraceyAction implements Action {
 
     private String metadata;
@@ -58,11 +54,4 @@ public class TraceyAction implements Action {
     public void setEnvKey(String envKey) {
         this.envKey = envKey;
     }
-
-
-    @Override
-    public String toString() {
-        return String.format("Environment: %s%nEnvironment key: %s", metadata , envKey);
-    }
-
 }
