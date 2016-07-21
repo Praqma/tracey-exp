@@ -14,10 +14,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class EiffelEventTypeFilter extends TraceyEventTypeFilter implements Describable<EiffelEventTypeFilter> {
 
-    private List<EiffelEventTypeOption> acceptEventTypes = new ArrayList<EiffelEventTypeOption>();
+    private List<EiffelEventTypeOption> acceptEventTypes = new ArrayList<>();
 
     @DataBoundConstructor
-    public EiffelEventTypeFilter(List<EiffelEventTypeOption> acceptEventTypes) throws ClassNotFoundException {
+    public EiffelEventTypeFilter(List<EiffelEventTypeOption> acceptEventTypes) {
         super(createRules(acceptEventTypes));
         this.acceptEventTypes = acceptEventTypes;
     }

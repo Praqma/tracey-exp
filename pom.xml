@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.github.Praqma</groupId>
             <artifactId>tracey-broker</artifactId>
-            <version>3bcd977912</version>
+            <version>f52e523dbe</version>
         </dependency>
 
         <dependency>

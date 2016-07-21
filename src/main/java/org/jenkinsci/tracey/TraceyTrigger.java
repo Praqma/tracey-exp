@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.praqma.tracey.broker.TraceyIOError;
-import net.praqma.tracey.broker.TraceyValidatorError;
 import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
 import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
 import net.sf.json.JSONObject;
@@ -55,7 +54,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     private boolean gitReady;
 
     //Post recieve fileters
-    private List<TraceyFilter> filters = new ArrayList<TraceyFilter>();
+    private List<TraceyFilter> filters = new ArrayList<>();
     private String regexToEnv;
 
     /**
@@ -82,8 +81,6 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         try {
             consumerTag = broker.receive(getExchange());
-        } catch (TraceyValidatorError ex) {
-            LOG.log(Level.INFO, "Failed to validate", ex);
         } catch (TraceyIOError ex) {
             LOG.log(Level.SEVERE, "IOError caught", ex);
         }
