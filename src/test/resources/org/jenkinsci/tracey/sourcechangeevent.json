@@ -1,0 +1,42 @@
+{
+ "meta": {
+   "id": "cdc049d4-eb77-4ab7-a96a-b0c91711354c",
+   "type": "EiffelSourceChangeCreatedEvent",
+   "time": "1467899725350",
+   "source": {
+     "domainId": "domainId",
+     "host": "host",
+     "name": "name",
+     "uri": "uri",
+     "serializer": {
+       "groupId": "group",
+       "artifactId": "id",
+       "version": "1.0.0"
+     }
+   }
+ },
+ "links": [{
+   "type": "PREVIOUS_VERSION",
+   "id": "8a718a03-f473-4e61-9bae-e986885fee18"
+ }, {
+   "type": "CAUSE",
+   "id": "e5ae20a3-0d79-4513-8819-2da9b13d45b8"
+ }],
+ "data": {
+   "author": {
+     "name": "Andrey Devyatkin",
+     "email": "andrey.a.devyatkin@gmail.com"
+   },
+   "change": {
+     "insertions": 246,
+     "deletions": 190,
+     "files": ["MODIFY .gitignore", "DELETE src/main/java/net/praqma/tracey/protocol/eiffel/EiffelEventFactory.java", "DELETE src/main/java/net/praqma/tracey/protocol/eiffel/MetaFactory.java", "MODIFY src/main/java/net/praqma/tracey/protocol/eiffel/cli/Main.java", "ADD src/main/java/net/praqma/tracey/protocol/eiffel/factories/BaseFactory.java", "ADD src/main/java/net/praqma/tracey/protocol/eiffel/factories/EiffelSourceChangeCreatedEventFactory.java", "RENAME src/main/java/net/praqma/tracey/protocol/eiffel/EiffelSourceChangeCreatedEventFactory.java \u003d\u003e src/main/java/net/praqma/tracey/protocol/eiffel/utils/GitUtils.java", "ADD src/main/proto/eiffel_activity_finished_event.proto", "ADD src/main/proto/eiffel_artifact_published_event.proto", "DELETE src/main/proto/eiffel_event.proto", "MODIFY src/main/proto/eiffel_source_change_created_event.proto", "ADD src/main/proto/models.proto"]
+   },
+   "gitIdentifier": {
+     "commitId": "62714cf73de7d263186bf87512bca8d1638a84e2",
+     "branch": "master",
+     "repoName": "tracey-protocol-eiffel",
+     "repoUri": "https://github.com/Praqma/tracey-protocol-eiffel.git"
+   }
+ }
+}
