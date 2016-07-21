@@ -151,6 +151,10 @@ public class JenkinsTriggerTest {
 
         r.waitUntilNoActivityUpTo(timeout);
 
+        sender.send("We check the inverse is true as well", "tracey");
+
+        r.waitUntilNoActivityUpTo(timeout);
+
         assertEquals(1, p._getRuns().size());
 
     }
