@@ -14,6 +14,31 @@ Then you need to enable to tracey trigger on your job
 
 That's it. You're good to go.
 
+#### Configuring the trigger using the Jenkins Job DSL plugin
+
+You can configure the Tracey trigger using Jenkins Job DSL:
+
+```
+job('tracey-job') {
+    triggers {
+        tracey('exchangeName', 'traceyHostName') {
+            injectEnvironment {
+                payloadKey 'MY_PAYLOAD_ENV_KEY'
+                payloadInjection "FOO (foo)*", "BAR [BAR]*"
+                injectGitVariables true
+            }
+            filters {
+                payloadRegex '\\d{5}'
+                eiffelEventType {
+                    artifactPublished()
+                    sourceChangeCreated()        
+                }
+            }
+        }
+    }
+}
+```
+
 ### Environment
 
 You can add the content of the recieved message as an environment variable to your build by checking the `Add payload to environment` checkbox. This will unfold two additonal options.
@@ -32,4 +57,8 @@ The sencond filter is a `EiffelEventTypeFilter` that looks to see if the message
 
 Filters are applied in order. If one of your choices rejects the payload and the message received, the message will not trigger this project. 
 
+<<<<<<< 803a0b3d3ba0762146a2b1289bdcbb620aa2c3af
+=======
+The second filter is a `EiffelEventTypeFilter` that looks to see if the message is in the `Eiffel` format.
+>>>>>>> Added Job DSL support
 
