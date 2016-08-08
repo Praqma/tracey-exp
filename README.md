@@ -30,3 +30,6 @@ The first is a `Payload` filter that compares the contents of a message and pars
 
 The sencond filter is a `EiffelEventTypeFilter` that looks to see if the message is in the `Eiffel` format. More detail about this format can be found [here](https://github.com/Ericsson/eiffel). 
 
+Filters are applied in order. If one of your choices rejects the payload and the message received, the message will not trigger this project. 
+
+
