@@ -1,6 +1,6 @@
 ## Tracey Jenkins Trigger Plugin
 
-The tracey trigger plugin add the option to add a trigger to a project. 
+This plugin allows you to trigger jobs using [RabbitMQ](https://www.rabbitmq.com/), and also provides additonal integrations to respond to messages in the Eiffel messagaging format. Which is documented [here](https://github.com/Ericsson/eiffel).   
 
 ### Configuring the trigger
 
@@ -14,16 +14,19 @@ Then you need to enable to tracey trigger on your job
 
 That's it. You're good to go.
 
-
 ### Environment
 
-We can add the received payload to an environment variable, and we can add additional variables for use with the `Git Plugin`. This is only possible if the received message is an `EiffelSourceChangeCreatedEvent`. 
+You can add the content of the recieved message as an environment variable to your build by checking the `Add payload to environment` checkbox. This will unfold two additonal options.
 
+ - `Inject variables for Git Plugin` _requires an EiffelSourceChangeCreatedEvent type of payload_. See more [here](https://github.com/Ericsson/eiffel/blob/master/eiffel-vocabulary/EiffelSourceChangeCreatedEvent.md)
+ 
+ - `Add payloads to environemnt`. A list of environment variables to add to the build. Syntax is explained in the help for the input field.
+ 
 ### Filters
 
 We also provide the option to add filters to the trigger. Currently we have two types of filters. 
 
-The first is a `Payload` filter that compares the contents of a message and parses it using the configured regex. 
+The first is a `Payload` filter that compares the contents of a message and parses it using the configured regex. If the payload matches the provided regex, then this message triggers the job, otherwise not.  
 
-The sencond filter is a `EiffelEventTypeFilter` that looks to see if the message is in the `Eiffel` format.
+The sencond filter is a `EiffelEventTypeFilter` that looks to see if the message is in the `Eiffel` format. More detail
 

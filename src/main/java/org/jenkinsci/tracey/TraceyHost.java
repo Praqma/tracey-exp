@@ -64,7 +64,8 @@ public class TraceyHost implements Describable<TraceyHost> {
     }
 
     /**
-     * @param credentialId the credentialId to set
+     * @param credentialId the credentialId to set. This is set using form binding
+     *        with the provided credentials control. 
      */
     public void setCredentialId(String credentialId) {
         this.credentialId = credentialId;

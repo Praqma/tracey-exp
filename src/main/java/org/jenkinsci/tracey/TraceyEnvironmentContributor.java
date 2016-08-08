@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import org.json.JSONObject;
 import net.praqma.tracey.broker.rabbitmq.TraceyEiffelMessageValidator;
 import org.apache.commons.lang.StringUtils;
@@ -102,8 +103,8 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
         return p;
     }
 
-    public static HashMap<String,String> findEnvValues(HashMap<String,Pattern> patterns, String payload) {
-        HashMap<String,String> envValues = new HashMap<String, String>();
+    public static HashMap<String,String> findEnvValues(@Nonnull HashMap<String,Pattern> patterns, String payload) {
+        HashMap<String,String> envValues = new HashMap<>();
         for(Entry<String,Pattern> s : patterns.entrySet()) {
             Matcher m = s.getValue().matcher(payload);
             while(m.find()) {
