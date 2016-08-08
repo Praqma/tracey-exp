@@ -28,5 +28,5 @@ We also provide the option to add filters to the trigger. Currently we have two 
 
 The first is a `Payload` filter that compares the contents of a message and parses it using the configured regex. If the payload matches the provided regex, then this message triggers the job, otherwise not.  
 
-The sencond filter is a `EiffelEventTypeFilter` that looks to see if the message is in the `Eiffel` format. More detail
+The sencond filter is a `EiffelEventTypeFilter` that looks to see if the message is in the `Eiffel` format. More detail about this format can be found [here](https://github.com/Ericsson/eiffel). 
 
