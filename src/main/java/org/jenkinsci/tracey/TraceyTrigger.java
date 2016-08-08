@@ -294,10 +294,13 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         public ListBoxModel doFillTraceyHostItems() {
             ListBoxModel model = new ListBoxModel();
-            List<TraceyHost> hosts = GlobalConfiguration.all().get(TraceyGlobalConfig.class).getConfiguredHosts();
-            if(hosts != null) {
-                for(TraceyHost th : hosts) {
-                    model.add(th.getDescription(), th.getCredentialId());
+            TraceyGlobalConfig conf = GlobalConfiguration.all().get(TraceyGlobalConfig.class);
+            if(conf != null) {
+                List<TraceyHost> hosts = conf.getConfiguredHosts();
+                if(hosts != null) {
+                    for(TraceyHost th : hosts) {
+                        model.add(th.getDescription(), th.getCredentialId());
+                    }
                 }
             }
             return model;
