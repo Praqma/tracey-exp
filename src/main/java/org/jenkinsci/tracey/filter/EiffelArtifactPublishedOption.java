@@ -25,6 +25,7 @@ package org.jenkinsci.tracey.filter;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -45,7 +46,7 @@ public class EiffelArtifactPublishedOption extends EiffelEventTypeOption {
 
     @Override
     public Descriptor<EiffelEventTypeOption> getDescriptor() {
-        return new EiffelArtifactPublishedOptionDescriptor();
+        return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
     @Extension

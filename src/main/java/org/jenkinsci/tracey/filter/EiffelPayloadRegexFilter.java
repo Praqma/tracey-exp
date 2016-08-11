@@ -7,6 +7,7 @@ import hudson.util.FormValidation;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import jenkins.model.Jenkins;
 import net.praqma.tracey.broker.rabbitmq.PayloadRegexFilter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -32,7 +33,7 @@ public class EiffelPayloadRegexFilter extends PayloadRegexFilter implements Desc
 
     @Override
     public Descriptor<EiffelPayloadRegexFilter> getDescriptor() {
-        return new EiffelPayloadRegexFilterDescriptor();
+        return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
     @Extension

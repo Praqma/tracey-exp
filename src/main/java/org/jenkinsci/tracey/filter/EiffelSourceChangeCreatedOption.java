@@ -2,6 +2,7 @@ package org.jenkinsci.tracey.filter;
 
 import hudson.Extension;
 import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class EiffelSourceChangeCreatedOption extends EiffelEventTypeOption {
@@ -18,7 +19,7 @@ public class EiffelSourceChangeCreatedOption extends EiffelEventTypeOption {
 
     @Override
     public Descriptor<EiffelEventTypeOption> getDescriptor() {
-        return new EiffelSourceChangeCreatedOptionDescriptor();
+        return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
     @Extension
