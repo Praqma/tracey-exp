@@ -25,6 +25,7 @@ import org.jenkinsci.tracey.filter.EiffelEventTypeOption;
 import org.jenkinsci.tracey.filter.EiffelSourceChangeCreatedOption;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class JenkinsTriggerTest {
 
@@ -152,6 +153,32 @@ public class JenkinsTriggerTest {
         r.waitUntilNoActivityUpTo(timeout);
 
         sender.send("We check the inverse is true as well", "tracey");
+
+        r.waitUntilNoActivityUpTo(timeout);
+
+        assertEquals(1, p._getRuns().size());
+    }
+
+    @Test
+    public void acceptMultilineRegexFromEiffelGeneration() throws Exception {
+
+        Assume.assumeThat(sr.isResponding(), is(true));
+        URI path = JenkinsTriggerTest.class.getResource("sourcechangeevent.json").toURI();
+        String contents = new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
+
+        UsernamePasswordCredentialsImpl creds = createCredentials();
+        FreeStyleProject p = createAndConfigureProject(r, "Test_Accept_MultilineRegex", creds);
+
+        TraceyFilter tf = new EiffelPayloadRegexFilter("(.*)EiffelSourceChangeCreatedEvent(.*)");
+        assertNotNull("The post recieve hook should not reject this payload", tf.postReceive(contents));
+        assertNull("This payload should be ignored", tf.postReceive("(.*)Mads(.*)"));
+
+        TraceyTrigger tt = new TraceyTrigger(exchange, creds.getId(), false, false, envKey, Arrays.asList(tf));
+        p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
+        tt.start(p, true);
+
+        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(traceyHost, user, password, 6666);
+        sender.send(contents, "tracey");
 
         r.waitUntilNoActivityUpTo(timeout);
 

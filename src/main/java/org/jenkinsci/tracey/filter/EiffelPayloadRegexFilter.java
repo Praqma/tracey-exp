@@ -24,7 +24,7 @@ public class EiffelPayloadRegexFilter extends PayloadRegexFilter implements Desc
     @Override
     public String postReceive(String payload) {
         Matcher m = getRegexCompiled().matcher(payload);
-        if(m.matches()) {
+        if(m.find()) {
             return payload;
         }
         LOG.info(String.format("Regex '%s' did not match anything in%n%s", getRegex(), payload));
