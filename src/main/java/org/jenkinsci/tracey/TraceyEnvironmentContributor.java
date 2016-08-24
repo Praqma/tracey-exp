@@ -85,17 +85,18 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
     }
 
     public static HashMap<String,Pattern> validateRegex(String regex) throws PatternSyntaxException {
-        HashMap<String,Pattern> p = new HashMap<String, Pattern>();
+        HashMap<String,Pattern> p = new HashMap<>();
+        LOG.info("Validating regex");
         if(!StringUtils.isBlank(regex)) {
             String[] lines = regex.split("[\\r\\n]+");
-            LOG.fine(String.format("Found %s lines in configuration", lines.length));
+            LOG.info(String.format("Found %s lines in configuration", lines.length));
             for(String line : lines) {
                 String[] comp = line.split("\\s");
                 if(comp.length == 2) {
                     String key = comp[0];
                     String rx = comp[1];
-                    Pattern pat = Pattern.compile(rx);
-                    LOG.fine(String.format("Added regex %s", pat));
+                    Pattern pat = Pattern.compile(rx, Pattern.MULTILINE);
+                    LOG.info(String.format("Added regex %s", pat));
                     p.put(key, pat);
                 }
             }
@@ -107,8 +108,14 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
         HashMap<String,String> envValues = new HashMap<>();
         for(Entry<String,Pattern> s : patterns.entrySet()) {
             Matcher m = s.getValue().matcher(payload);
-            while(m.find()) {
-                envValues.put(s.getKey(), m.group(1));
+            if(m.find()) {
+                for (int i=0; i <= m.groupCount(); i++) {
+                    if(i == 0) {
+                        envValues.put(s.getKey(), m.group(i));
+                    } else {
+                        envValues.put(s.getKey()+"_"+i, m.group(i));
+                    }
+                }
                 break;
             }
         }
