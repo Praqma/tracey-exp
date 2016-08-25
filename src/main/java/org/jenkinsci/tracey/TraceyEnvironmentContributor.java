@@ -116,7 +116,7 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
                         envValues.put(s.getKey()+"_"+i, m.group(i));
                     }
                 }
-                break;
+                continue;
             }
         }
         return envValues;
