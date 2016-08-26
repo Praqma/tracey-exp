@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class EnvironmentContributionTest {
-    
+
     String envConf = "ONE one:(\\S+)\nTWO two:(\\S+)";
     String input = "This is value we want to capture: one:one two:two";
 
@@ -22,7 +22,9 @@ public class EnvironmentContributionTest {
     public void testCorrectSubstitution() {
         HashMap<String,Pattern> patterns = TraceyEnvironmentContributor.validateRegex(envConf);
         HashMap<String,String> values = TraceyEnvironmentContributor.findEnvValues(patterns, input);
-        assertEquals("one", values.get("ONE"));
-        assertEquals("two", values.get("TWO"));
+        assertEquals("one:one", values.get("ONE"));
+        assertEquals("two:two", values.get("TWO"));
+        assertEquals("one", values.get("ONE_1"));
+        assertEquals("two", values.get("TWO_1"));
     }
 }
