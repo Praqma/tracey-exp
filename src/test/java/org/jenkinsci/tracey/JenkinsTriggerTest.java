@@ -58,7 +58,7 @@ public class JenkinsTriggerTest {
         FreeStyleProject p = r.createFreeStyleProject(jobName);
         ExtensionList<TraceyGlobalConfig> t = r.getInstance().getExtensionList(TraceyGlobalConfig.class);
         TraceyGlobalConfig tgc = t.get(TraceyGlobalConfig.class);
-        TraceyHost th = new TraceyHost(traceyHost, creds.getId(), "Test credential for test", port);
+        TraceyHost th = new TraceyHost(traceyHost, creds.getId(), "Test credential for test", port, "tracey-host-id");
         tgc.setConfiguredHosts(Arrays.asList(th));
         return p;
     }
