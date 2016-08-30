@@ -129,7 +129,9 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     public void stop() {
         try {
             super.stop();
-            broker.getReceiver().cancel(consumerTag);
+            if(broker != null) {
+                broker.getReceiver().cancel(consumerTag);
+            }
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, "Failed to stop consumer", ex);
         }
@@ -286,7 +288,6 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             return "Tracey Trigger";
         }
 
-
         @Override
         public Trigger<?> newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return super.newInstance(req, formData); //To change body of generated methods, choose Tools | Templates.
@@ -299,7 +300,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
                 List<TraceyHost> hosts = conf.getConfiguredHosts();
                 if(hosts != null) {
                     for(TraceyHost th : hosts) {
-                        model.add(th.getDescription(), th.getCredentialId());
+                        model.add(th.getDescription(), th.getHostId());
                     }
                 }
             }
@@ -307,7 +308,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         }
 
         public static List<Descriptor> getFilters() {
-            List<Descriptor> descriptorz = new ArrayList<Descriptor>();
+            List<Descriptor> descriptorz = new ArrayList<>();
             descriptorz.add(Jenkins.getActiveInstance().getDescriptorByType(EiffelPayloadRegexFilterDescriptor.class));
             descriptorz.add(Jenkins.getActiveInstance().getDescriptorByType(EiffelEventTypeFilterDescriptor.class));
             return descriptorz;

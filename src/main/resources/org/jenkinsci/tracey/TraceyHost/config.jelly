@@ -17,6 +17,12 @@
         <c:select/>
     </f:entry>
 
+    <f:advanced>
+        <f:entry field="hostId" title="Host id">
+            <f:textbox default="${descriptor.generateRandomUUID()}"/>
+        </f:entry>
+    </f:advanced>
+
     <f:entry>
         <f:repeatableDeleteButton/>
     </f:entry>

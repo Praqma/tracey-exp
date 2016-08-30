@@ -16,28 +16,28 @@ public class TraceyTriggerJobDslExtension extends ContextExtensionPoint {
     /**
      * Configures a Tracey trigger for a job
      * @param exchange The exchange to listen to
-     * @param host The Tracey host name
+     * @param hostId The Tracey host name
      * @return A configured Tracey trigger
      */
     @RequiresPlugin(id = "tracey", minimumVersion = "1.0-SNAPSHOT")
     @DslExtensionMethod(context = TriggerContext.class)
-    public Object tracey(String exchange, String host) {
-        return tracey(exchange, host, null);
+    public Object tracey(String exchange, String hostId) {
+        return tracey(exchange, hostId, null);
     }
 
     /**
      * Configures a Tracey trigger for a job
      * @param exchange The exchange to listen to
-     * @param host The Tracey host name
+     * @param hostId The Tracey host name
      * @param closure Closure containing Tracey trigger configuration
      * @return A configured Tracey trigger
      */
     @RequiresPlugin(id = "tracey", minimumVersion = "1.0-SNAPSHOT")
     @DslExtensionMethod(context = TriggerContext.class)
-    public Object tracey(String exchange, String host, Closure closure) {
+    public Object tracey(String exchange, String hostId, Closure closure) {
         TraceyTriggerJobDslContext context = new TraceyTriggerJobDslContext();
         if(closure!= null) executeInContext(closure, context);
-        TraceyTrigger trigger = new TraceyTrigger(exchange, host,
+        TraceyTrigger trigger = new TraceyTrigger(exchange, hostId,
                 context.injectEnvironment,
                 context.injectGitVariables,
                 context.envKey,

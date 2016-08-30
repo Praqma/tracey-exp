@@ -15,6 +15,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
@@ -27,14 +28,16 @@ public class TraceyHost implements Describable<TraceyHost> {
     private String host;
     private String credentialId;
     private String description;
+    private String hostId;
     private int traceyPort = 5672;
 
     @DataBoundConstructor
-    public TraceyHost(String host, String credentialId, String description, int traceyPort) {
+    public TraceyHost(String host, String credentialId, String description, int traceyPort, String hostId) {
         this.credentialId = credentialId;
         this.host = host;
         this.description = description;
         this.traceyPort = traceyPort;
+        this.hostId = hostId;
     }
 
     @Override
@@ -65,7 +68,7 @@ public class TraceyHost implements Describable<TraceyHost> {
 
     /**
      * @param credentialId the credentialId to set. This is set using form binding
-     *        with the provided credentials control. 
+     *        with the provided credentials control.
      */
     public void setCredentialId(String credentialId) {
         this.credentialId = credentialId;
@@ -99,6 +102,20 @@ public class TraceyHost implements Describable<TraceyHost> {
         this.traceyPort = traceyPort;
     }
 
+    /**
+     * @return the hostId
+     */
+    public String getHostId() {
+        return hostId;
+    }
+
+    /**
+     * @param hostId the hostId to set
+     */
+    public void setHostId(String hostId) {
+        this.hostId = hostId;
+    }
+
 
     @Extension
     public static class TraceyHostDescriptor extends Descriptor<TraceyHost> {
@@ -111,6 +128,9 @@ public class TraceyHost implements Describable<TraceyHost> {
             return "Tracey Host";
         }
 
+        public static String generateRandomUUID() {
+            return UUID.randomUUID().toString();
+        }
 
         public ListBoxModel doFillCredentialIdItems(final @AncestorInPath ItemGroup<?> context) {
             final List<StandardCredentials> credentials = CredentialsProvider.lookupCredentials(StandardCredentials.class, context, ACL.SYSTEM, Collections.<DomainRequirement>emptyList());

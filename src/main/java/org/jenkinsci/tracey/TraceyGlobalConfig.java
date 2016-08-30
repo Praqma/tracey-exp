@@ -44,7 +44,7 @@ public class TraceyGlobalConfig extends GlobalConfiguration {
 
     public static TraceyHost getById(String id) {
         for(TraceyHost th : get().configuredHosts) {
-            if(th.getCredentialId().equals(id)) {
+            if(th.getHostId().equals(id)) {
                 return th;
             }
         }
