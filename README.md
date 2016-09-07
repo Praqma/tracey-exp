@@ -21,7 +21,7 @@ You can configure the Tracey trigger using Jenkins Job DSL:
 ```
 job('tracey-job') {
     triggers {
-        tracey('exchangeName', 'traceyHostName') {
+        tracey('exchangeName', 'tracey-host-id') {
             injectEnvironment {
                 payloadKey 'MY_PAYLOAD_ENV_KEY'
                 payloadInjection "FOO (foo)*", "BAR [BAR]*"
@@ -39,6 +39,8 @@ job('tracey-job') {
 }
 ```
 
+The tracey host id is the unique identifier assigned to the configured host. You can set this value yourself by expanding the 'Advanced' tab in the host configuration.
+
 ### Environment
 
 You can add the content of the recieved message as an environment variable to your build by checking the `Add payload to environment` checkbox. This will unfold two additonal options.
@@ -55,4 +57,16 @@ The first is a `Payload` filter that compares the contents of a message and pars
 
 The sencond filter is a `EiffelEventTypeFilter` that looks to see if the message is in the `Eiffel` format. More detail about this format can be found [here](https://github.com/Ericsson/eiffel). 
 
-Filters are applied in order. If one of your choices rejects the payload and the message received, the message will not trigger this project. 
+Filters are applied in order. If one of your choices rejects the payload and the message received, the message will not trigger this project.
+
+### Self contained demo project
+
+We also provide a self contained demo project for tracey. This demo requires docker with docker compose to work. You can find the repository [here](https://github.com/Praqma/tracey)
+
+In order to get this up and running:
+
+    git clone git@github.com:Praqma/tracey.git
+    cd tracey
+    docker-compose up
+
+That should do it. Now you have a jenkins running on port 8080, a configured rabbitmq server and a configured job. Login details are (jenkins/demo).
