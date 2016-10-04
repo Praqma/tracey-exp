@@ -4,13 +4,14 @@ import hudson.Extension;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
+import net.praqma.tracey.broker.impl.filters.PayloadRegexFilter;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import jenkins.model.Jenkins;
-import net.praqma.tracey.broker.rabbitmq.PayloadRegexFilter;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
 public class EiffelPayloadRegexFilter extends PayloadRegexFilter implements Describable<EiffelPayloadRegexFilter> {
 

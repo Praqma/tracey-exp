@@ -1,10 +1,8 @@
 package org.jenkinsci.tracey;
 
-import groovy.lang.Closure;
 import javaposse.jobdsl.dsl.Context;
-import javaposse.jobdsl.dsl.ContextHelper;
-import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
-import org.jenkinsci.tracey.filter.*;
+import net.praqma.tracey.broker.api.TraceyFilter;
+import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +21,4 @@ public class TraceyFilterJobDslContext implements Context {
         filters.add(new EiffelPayloadRegexFilter(regex));
     }
 
-    /**
-     * Configures an Eiffel EventType filter
-     * @param closure Closure containing EventTypeOption configuration
-     */
-    public void eiffelEventType(Closure closure) {
-        TraceyEiffelEventTypeJobDslContext context = new TraceyEiffelEventTypeJobDslContext();
-        ContextHelper.executeInContext(closure, context);
-        filters.add(context.filter);
-    }
 }

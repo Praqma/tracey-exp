@@ -6,13 +6,14 @@ import com.rabbitmq.client.ShutdownSignalException;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Job;
+import jenkins.model.Jenkins;
+import jenkins.model.ParameterizedJobMixIn;
+import net.praqma.tracey.broker.api.TraceyFilter;
+import net.praqma.tracey.broker.impl.rabbitmq.TraceyRabbitMQMessageHandler;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
-import jenkins.model.Jenkins;
-import jenkins.model.ParameterizedJobMixIn;
-import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQMessageHandler;
-import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
 
 /**
  *
