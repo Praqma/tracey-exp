@@ -1,17 +1,16 @@
 package org.jenkinsci.tracey;
 
-import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import org.jenkinsci.tracey.filter.TraceyPayloadRegexFilter;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class EiffelPayloadRegexTest {
 
     @Test
     public void accept() {
         String msg = "mads is cool";
-        EiffelPayloadRegexFilter madsFilter = new EiffelPayloadRegexFilter(".*mads.*");
+        TraceyPayloadRegexFilter madsFilter = new TraceyPayloadRegexFilter(".*mads.*");
         String response =  madsFilter.postReceive(msg);
         assertNotNull(response);
         assertEquals("mads is cool", response);
@@ -20,7 +19,7 @@ public class EiffelPayloadRegexTest {
     @Test
     public void reject() {
         String msg = "reject this message";
-        EiffelPayloadRegexFilter madsFilter = new EiffelPayloadRegexFilter(".*mads.*");
+        TraceyPayloadRegexFilter madsFilter = new TraceyPayloadRegexFilter(".*mads.*");
         String response =  madsFilter.postReceive(msg);
         assertNull(response);
     }

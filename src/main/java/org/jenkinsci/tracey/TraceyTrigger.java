@@ -27,7 +27,9 @@ import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQRoutingInfo;
 import net.praqma.tracey.broker.impl.rabbitmq.TraceyRabbitMQBrokerImpl;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter.EiffelPayloadRegexFilterDescriptor;
+import org.jenkinsci.tracey.filter.PayloadJSONBasicFilter;
+import org.jenkinsci.tracey.filter.PayloadJSONRegexFilter;
+import org.jenkinsci.tracey.filter.TraceyPayloadRegexFilter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -320,7 +322,9 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         public static List<Descriptor> getFilters() {
             List<Descriptor> descriptorz = new ArrayList<>();
-            descriptorz.add(Jenkins.getInstance().getDescriptorByType(EiffelPayloadRegexFilterDescriptor.class));
+            descriptorz.add(Jenkins.getInstance().getDescriptorByType(TraceyPayloadRegexFilter.PayloadRegexFilterDescriptor.class));
+            descriptorz.add(Jenkins.getInstance().getDescriptorByType(PayloadJSONBasicFilter.PayloadJSONBasicFilterDescriptor.class));
+            descriptorz.add(Jenkins.getInstance().getDescriptorByType(PayloadJSONRegexFilter.PayloadJSONRegexFilterDescriptor.class));
             return descriptorz;
         }
 

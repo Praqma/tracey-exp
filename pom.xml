@@ -25,6 +25,7 @@
     <name>Tracey Jenkins Trigger Plugin</name>
 
     <properties>
+        <java.level>8</java.level>
         <jenkins.version>2.11</jenkins.version>
         <commons.lang3.version>3.4</commons.lang3.version>
     </properties>
@@ -57,10 +58,15 @@
     <dependencies>
 
         <dependency>
-
             <groupId>com.github.Praqma</groupId>
             <artifactId>tracey-broker</artifactId>
             <version>1.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>2.2.0</version>
         </dependency>
 
         <dependency>
