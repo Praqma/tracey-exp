@@ -25,6 +25,7 @@
     <name>Tracey Jenkins Trigger Plugin</name>
 
     <properties>
+        <java.level>8</java.level>
         <jenkins.version>2.11</jenkins.version>
         <commons.lang3.version>3.4</commons.lang3.version>
     </properties>
