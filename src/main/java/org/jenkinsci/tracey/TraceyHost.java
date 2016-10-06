@@ -13,9 +13,7 @@ import hudson.model.ItemGroup;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQDefaults;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
@@ -23,13 +21,17 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
 public class TraceyHost implements Describable<TraceyHost> {
 
     private String host;
     private String credentialId;
     private String description;
     private String hostId;
-    private int traceyPort = 5672;
+    private int traceyPort = RabbitMQDefaults.PORT;//5672
 
     @DataBoundConstructor
     public TraceyHost(String host, String credentialId, String description, int traceyPort, String hostId) {
@@ -119,9 +121,6 @@ public class TraceyHost implements Describable<TraceyHost> {
 
     @Extension
     public static class TraceyHostDescriptor extends Descriptor<TraceyHost> {
-
-        public static final String DEFAULT_HOST = "localhost";
-        public static final int DEFAULT_PORT = 5672;
 
         @Override
         public String getDisplayName() {

@@ -6,26 +6,26 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import hudson.ExtensionList;
 import hudson.model.FreeStyleProject;
+import net.praqma.tracey.broker.api.TraceyFilter;
+import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQConnection;
+import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQDefaults;
+import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQRoutingInfo;
+import net.praqma.tracey.broker.impl.rabbitmq.TraceyRabbitMQSenderImpl;
+import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter;
+import org.junit.Assume;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
-import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
-import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQSenderImpl;
-import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.junit.Assume;
+
 import static org.hamcrest.CoreMatchers.is;
-import org.jenkinsci.tracey.filter.EiffelEventTypeFilter;
-import org.jenkinsci.tracey.filter.EiffelEventTypeOption;
-import org.jenkinsci.tracey.filter.EiffelSourceChangeCreatedOption;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class JenkinsTriggerTest {
 
@@ -75,8 +75,8 @@ public class JenkinsTriggerTest {
         p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
         tt.start(p, true);
 
-        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(traceyHost, user, password, port);
-        sender.send("Hi there we should trigger", "tracey");
+        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(new RabbitMQConnection(traceyHost, port, user, password, RabbitMQDefaults.AUTOMATIC_RECOVERY));
+        sender.send("Hi there we should trigger", new RabbitMQRoutingInfo());
 
         r.waitUntilNoActivityUpTo(timeout);
 
@@ -98,65 +98,15 @@ public class JenkinsTriggerTest {
         p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
         tt.start(p, true);
 
-        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(traceyHost, user, password, 6666);
-        sender.send("Hi there we should trigger. Since we do not include the magic word", "tracey");
-        sender.send("This one should be picked up. Since we do include the magic KEYWORD", "tracey");
+        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(new RabbitMQConnection(traceyHost, 6666, user, password, RabbitMQDefaults.AUTOMATIC_RECOVERY));
+        sender.send("Hi there we should trigger. Since we do not include the magic word", new RabbitMQRoutingInfo());
+        sender.send("This one should be picked up. Since we do include the magic KEYWORD", new RabbitMQRoutingInfo());
 
         r.waitUntilNoActivityUpTo(timeout);
 
         TraceyAction ta = p.getBuildByNumber(1).getAction(TraceyAction.class);
         assertNotNull(ta);
         assertEquals("This one should be picked up. Since we do include the magic KEYWORD", ta.getMetadata());
-    }
-
-    @Test
-    public void givenFreeStyleJob_And_EiffelEventTypeFilter_Do_Not_Trigger() throws Exception {
-        Assume.assumeThat(sr.isResponding(), is(true));
-
-        UsernamePasswordCredentialsImpl creds = createCredentials();
-        FreeStyleProject p = createAndConfigureProject(r, "Test_Ignore_Eiffel_Event_Filter", creds);
-
-        TraceyFilter tf = new EiffelEventTypeFilter(Arrays.asList((EiffelEventTypeOption) new EiffelSourceChangeCreatedOption()));
-
-        TraceyTrigger tt = new TraceyTrigger(exchange, creds.getId(), false, false, envKey, Arrays.asList(tf));
-        p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
-        tt.start(p, true);
-
-        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(traceyHost, user, password, 6666);
-        sender.send("No triggering", "tracey");
-
-        r.waitUntilNoActivityUpTo(timeout);
-
-        assertEquals(0, p._getRuns().size());
-
-    }
-
-    @Test
-    public void giveFreeStyleJob_And_EiffeEventTypeFilter_Do_Trigger() throws Exception {
-        Assume.assumeThat(sr.isResponding(), is(true));
-
-        URI path = JenkinsTriggerTest.class.getResource("sourcechangeevent.json").toURI();
-        String contents = new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
-
-        UsernamePasswordCredentialsImpl creds = createCredentials();
-        FreeStyleProject p = createAndConfigureProject(r, "Test_Accept_Eiffel_Event_Filter", creds);
-
-        TraceyFilter tf = new EiffelEventTypeFilter(Arrays.asList((EiffelEventTypeOption) new EiffelSourceChangeCreatedOption()));
-
-        TraceyTrigger tt = new TraceyTrigger(exchange, creds.getId(), false, false, envKey, Arrays.asList(tf));
-        p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
-        tt.start(p, true);
-
-        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(traceyHost, user, password, 6666);
-        sender.send(contents, "tracey");
-
-        r.waitUntilNoActivityUpTo(timeout);
-
-        sender.send("We check the inverse is true as well", "tracey");
-
-        r.waitUntilNoActivityUpTo(timeout);
-
-        assertEquals(1, p._getRuns().size());
     }
 
     @Test
@@ -177,8 +127,8 @@ public class JenkinsTriggerTest {
         p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
         tt.start(p, true);
 
-        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(traceyHost, user, password, 6666);
-        sender.send(contents, "tracey");
+        TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(new RabbitMQConnection(traceyHost, 6666, user, password, RabbitMQDefaults.AUTOMATIC_RECOVERY));
+        sender.send(contents, new RabbitMQRoutingInfo());
 
         r.waitUntilNoActivityUpTo(timeout);
 

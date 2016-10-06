@@ -3,7 +3,7 @@ package org.jenkinsci.tracey;
 import groovy.lang.Closure;
 import javaposse.jobdsl.dsl.Context;
 import javaposse.jobdsl.dsl.ContextHelper;
-import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
+import net.praqma.tracey.broker.api.TraceyFilter;
 
 import java.util.ArrayList;
 import java.util.List;

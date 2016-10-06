@@ -17,34 +17,39 @@ import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
-import net.praqma.tracey.broker.TraceyIOError;
-import net.praqma.tracey.broker.rabbitmq.TraceyFilter;
-import net.praqma.tracey.broker.rabbitmq.TraceyRabbitMQBrokerImpl;
+import net.praqma.tracey.broker.api.TraceyFilter;
+import net.praqma.tracey.broker.api.TraceyIOError;
+import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQConnection;
+import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQDefaults;
+import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQRoutingInfo;
+import net.praqma.tracey.broker.impl.rabbitmq.TraceyRabbitMQBrokerImpl;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.tracey.TraceyHost.TraceyHostDescriptor;
-import org.jenkinsci.tracey.filter.EiffelEventTypeFilter.EiffelEventTypeFilterDescriptor;
 import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter.EiffelPayloadRegexFilterDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+//import org.jenkinsci.tracey.filter.EiffelEventTypeFilter.EiffelEventTypeFilterDescriptor;
+
 public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
-    private String exchange = "tracey";
-    private TraceyRabbitMQBrokerImpl.ExchangeType type = TraceyRabbitMQBrokerImpl.ExchangeType.TOPIC;
-    private String consumerTag;
+    private String exchange = RabbitMQDefaults.EXCHANGE_NAME;
+    private String type = RabbitMQDefaults.EXCHANGE_TYPE;
+    private String consumerTag; //???
     private transient TraceyRabbitMQBrokerImpl broker;
+    private transient RabbitMQRoutingInfo info;
 
     private String envKey = "TRACEY_PAYLOAD";
     private String traceyHost;
@@ -66,7 +71,10 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     public void start(final Job<?,?> project, boolean newInstance) {
         super.start(project, newInstance);
 
-        broker = configureBroker(project, traceyHost, type, exchange);
+        broker = configureBroker(project, traceyHost);
+        info = new RabbitMQRoutingInfo();
+        info.setExchangeName(exchange);
+        info.setExchangeType(type);
 
         TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey, filters);
         LOG.info(tbs.toString());
@@ -80,7 +88,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         broker.getReceiver().setHandler(tbs);
 
         try {
-            consumerTag = broker.receive(getExchange());
+            consumerTag = broker.receive(info);
         } catch (TraceyIOError ex) {
             LOG.log(Level.SEVERE, "IOError caught", ex);
         }
@@ -98,12 +106,12 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         return upw;
     }
 
-    private TraceyRabbitMQBrokerImpl configureBroker(Job<?,?> proj, String hid, TraceyRabbitMQBrokerImpl.ExchangeType t, String exch) {
+    private TraceyRabbitMQBrokerImpl configureBroker(Job<?,?> proj, String hid) {
         TraceyHost th = TraceyGlobalConfig.getById(hid);
         UsernamePasswordCredentials upw = getCredentials(th, proj);
         String tHost = th.getHost();
 
-        final Jenkins jenkins = Jenkins.getActiveInstance();
+        final Jenkins jenkins = Jenkins.getInstance();
         EnvVars env = new EnvVars();
 
         try {
@@ -113,14 +121,20 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         } catch (InterruptedException ex) {
             LOG.log(Level.SEVERE, "InterruptedException caught", ex);
         }
-
         if(upw != null) {
-            broker = new TraceyRabbitMQBrokerImpl(env.expand(tHost),
-                    Secret.toString(upw.getPassword()), upw.getUsername(), t, env.expand(exch), th.getTraceyPort());
+            broker = new TraceyRabbitMQBrokerImpl(new RabbitMQConnection(env.expand(tHost),
+                    th.getTraceyPort(),
+                    upw.getUsername(),
+                    Secret.toString(upw.getPassword()),
+                    RabbitMQDefaults.AUTOMATIC_RECOVERY),
+                    filters);
         } else {
-            broker = new TraceyRabbitMQBrokerImpl(TraceyHostDescriptor.DEFAULT_HOST,
-                    env.expand(TraceyTriggerDescriptor.DEFAULT_PASSWORD), env.expand(TraceyTriggerDescriptor.DEFAULT_USER),
-                    t, env.expand(exch));
+            broker = new TraceyRabbitMQBrokerImpl(new RabbitMQConnection(RabbitMQDefaults.HOST,
+                                                RabbitMQDefaults.PORT,
+                                                env.expand(RabbitMQDefaults.USERNAME),
+                                                env.expand(RabbitMQDefaults.PASSWORD),
+                                                RabbitMQDefaults.AUTOMATIC_RECOVERY),
+                                                filters);
         }
         return broker;
     }
@@ -269,9 +283,6 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     @Extension
     public static class TraceyTriggerDescriptor extends TriggerDescriptor {
 
-        public static final String DEFAULT_EXCHANGE = "tracey";
-        public static final String DEFAULT_USER = "guest";
-        public static final String DEFAULT_PASSWORD = "guest";
         public static final String DEFAULT_ENV_NAME = "TRACEY_PAYLOAD";
 
         public TraceyTriggerDescriptor() {
@@ -309,8 +320,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         public static List<Descriptor> getFilters() {
             List<Descriptor> descriptorz = new ArrayList<>();
-            descriptorz.add(Jenkins.getActiveInstance().getDescriptorByType(EiffelPayloadRegexFilterDescriptor.class));
-            descriptorz.add(Jenkins.getActiveInstance().getDescriptorByType(EiffelEventTypeFilterDescriptor.class));
+            descriptorz.add(Jenkins.getInstance().getDescriptorByType(EiffelPayloadRegexFilterDescriptor.class));
             return descriptorz;
         }
 

@@ -1,13 +1,15 @@
 package org.jenkinsci.tracey;
 
-import static jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.EnvironmentContributor;
-import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.triggers.Trigger;
+import org.apache.commons.lang.StringUtils;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -16,11 +18,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import org.json.JSONObject;
-import net.praqma.tracey.broker.rabbitmq.TraceyEiffelMessageValidator;
-import org.apache.commons.lang.StringUtils;
+
+import static jenkins.model.ParameterizedJobMixIn.ParameterizedJob;
 /**
  * I decided to go with an environment contributor instead of an action for workflow compatability
  * See this: http://stackoverflow.com/questions/31326286/can-a-workflow-step-access-environment-variables-provided-by-an-environmentcontr
@@ -51,16 +50,6 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
                     envs.putAll(findEnvValues(p, tAction.getMetadata()));
                 } catch (PatternSyntaxException ex) {
                     LOG.log(Level.WARNING, "Syntax error in regex detected", ex);
-                }
-
-                if(t.isGitReady()) {
-                    JSONObject git = TraceyEiffelMessageValidator.getGitIdentifier(tAction.getMetadata());
-                    if (git != null) {
-                        envs.put("GIT_COMMIT_TRACEY", git.getString("commitId"));
-                        envs.put("GIT_BRANCH_TRACEY", git.getString("branch"));
-                        envs.put("GIT_URL_TRACEY", git.getString("repoUri"));
-                        envs.put("GIT_REPO_NAME_TRACEY", git.getString("repoName"));
-                    }
                 }
             } else {
                 LOG.info(String.format("Tracey environment contribution disabled for job %s (%s)", r.getParent().getName(), r.getParent().getClass().getSimpleName()));
