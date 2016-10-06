@@ -29,8 +29,6 @@ import static org.junit.Assert.*;
 
 public class JenkinsTriggerTest {
 
-
-
     // Defaults
     private String exchange = "tracey";
     private String traceyHost = "localhost";

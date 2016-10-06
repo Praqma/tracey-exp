@@ -48,8 +48,9 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = RabbitMQDefaults.EXCHANGE_NAME;
-    private String type = RabbitMQDefaults.EXCHANGE_TYPE;
-    private String consumerTag; //???
+    //private String type = RabbitMQDefaults.EXCHANGE_TYPE;
+    private String type = "topic";
+    private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
     private transient RabbitMQRoutingInfo info;
 
@@ -82,6 +83,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
         LOG.info(tbs.toString());
         if(filters != null) {
             LOG.info(String.format("Filters for job %s", project.getName()));
+            LOG.info(String.format("Filters: %s", filters.toString()));
             for(TraceyFilter ft : filters) {
                 LOG.info(ft.getClass().getSimpleName());
             }
@@ -257,6 +259,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
      * @return the filters
      */
     public List<TraceyFilter> getFilters() {
+        LOG.info(String.format("Get gilters: %s", filters.toString()));
         return filters;
     }
 

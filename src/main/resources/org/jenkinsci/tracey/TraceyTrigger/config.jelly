@@ -10,18 +10,8 @@
         <f:select/>
     </f:entry>
 
-    <f:optionalBlock field="injectEnvironment" title="Add payload to environment" inline="true">
-        <f:entry field="envKey" title="Environment key">
-            <f:textbox default="${descriptor.DEFAULT_ENV_NAME}"/>
-        </f:entry>
-        <f:entry field="regexToEnv" title="Add payloads to environment">
-            <f:expandableTextbox/>
-        </f:entry>
-    </f:optionalBlock>
-
     <f:entry title="Filters" field="filters">
         <f:hetero-list descriptors="${descriptor.getFilters()}" items="${instance.filters}" name="filters" oneach="true" hasHeader="true"/>
     </f:entry>
-
 
 </j:jelly>
