@@ -19,12 +19,15 @@ public class PayloadJSONBasicFilter extends net.praqma.tracey.broker.impl.filter
 
     @Override
     public Descriptor<PayloadJSONBasicFilter> getDescriptor() {
+
         return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
     @Extension
     public static class PayloadJSONBasicFilterDescriptor extends Descriptor<PayloadJSONBasicFilter> {
 
+        public static String DEFAULT_KEY = "name";
+        public static String DEFAULT_VALUE = "value";
         @Override
         public String getDisplayName() {
             return "JSON Basic filter";

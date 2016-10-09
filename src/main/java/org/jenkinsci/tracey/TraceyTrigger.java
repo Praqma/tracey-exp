@@ -48,8 +48,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = RabbitMQDefaults.EXCHANGE_NAME;
-    //private String type = RabbitMQDefaults.EXCHANGE_TYPE;
-    private String type = "topic";
+    private String type = RabbitMQDefaults.EXCHANGE_TYPE;
     private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
     private transient RabbitMQRoutingInfo info;
@@ -61,7 +60,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     private boolean injectEnvironment = false;
     private boolean gitReady;
 
-    //Post recieve fileters
+    //Post receive filters
     private List<TraceyFilter> filters = new ArrayList<>();
     private String regexToEnv;
 
@@ -81,14 +80,6 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey, filters);
         LOG.info(tbs.toString());
-        if(filters != null) {
-            LOG.info(String.format("Filters for job %s", project.getName()));
-            LOG.info(String.format("Filters: %s", filters.toString()));
-            for(TraceyFilter ft : filters) {
-                LOG.info(ft.getClass().getSimpleName());
-            }
-            broker.getReceiver().getFilters().addAll(filters);
-        }
         broker.getReceiver().setHandler(tbs);
 
         try {
@@ -259,7 +250,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
      * @return the filters
      */
     public List<TraceyFilter> getFilters() {
-        LOG.info(String.format("Get gilters: %s", filters.toString()));
+        LOG.info(String.format("Get filters: %s", filters.toString()));
         return filters;
     }
 

@@ -4,7 +4,6 @@ import hudson.Extension;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
-import net.praqma.tracey.broker.impl.filters.PayloadRegexFilter;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.logging.Logger;
@@ -13,7 +12,7 @@ import java.util.logging.Logger;
  *
  */
 public class PayloadJSONRegexFilter extends net.praqma.tracey.broker.impl.filters.PayloadJSONFilter implements Describable<PayloadJSONRegexFilter> {
-    private static final Logger LOG = Logger.getLogger(PayloadRegexFilter.class.getName());
+    private static final Logger LOG = Logger.getLogger(PayloadJSONRegexFilter.class.getName());
 
     @DataBoundConstructor
     public PayloadJSONRegexFilter(String key, String value) {
@@ -27,6 +26,8 @@ public class PayloadJSONRegexFilter extends net.praqma.tracey.broker.impl.filter
 
     @Extension
     public static class PayloadJSONRegexFilterDescriptor extends Descriptor<PayloadJSONRegexFilter> {
+
+        public static String DEFAULT_REGEX = ".*";
 
         @Override
         public String getDisplayName() {
