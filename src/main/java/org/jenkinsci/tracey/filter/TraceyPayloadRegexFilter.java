@@ -5,7 +5,6 @@ import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
-import net.praqma.tracey.broker.impl.filters.PayloadRegexFilter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -13,12 +12,12 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class EiffelPayloadRegexFilter extends PayloadRegexFilter implements Describable<EiffelPayloadRegexFilter> {
+public class TraceyPayloadRegexFilter extends net.praqma.tracey.broker.impl.filters.PayloadRegexFilter implements Describable<TraceyPayloadRegexFilter> {
 
-    private static final Logger LOG = Logger.getLogger(EiffelPayloadRegexFilter.class.getName());
+    private static final Logger LOG = Logger.getLogger(TraceyPayloadRegexFilter.class.getName());
 
     @DataBoundConstructor
-    public EiffelPayloadRegexFilter(String regex) {
+    public TraceyPayloadRegexFilter(String regex) {
         super(regex);
     }
 
@@ -33,18 +32,18 @@ public class EiffelPayloadRegexFilter extends PayloadRegexFilter implements Desc
     }
 
     @Override
-    public Descriptor<EiffelPayloadRegexFilter> getDescriptor() {
+    public Descriptor<TraceyPayloadRegexFilter> getDescriptor() {
         return Jenkins.getInstance().getDescriptorOrDie(getClass());
     }
 
     @Extension
-    public static class EiffelPayloadRegexFilterDescriptor extends Descriptor<EiffelPayloadRegexFilter> {
+    public static class PayloadRegexFilterDescriptor extends Descriptor<TraceyPayloadRegexFilter> {
 
         public static String DEFAULT_REGEX = ".*";
 
         @Override
         public String getDisplayName() {
-            return "Payload filter";
+            return "Payload regex filter";
         }
 
         public FormValidation doCheckRegex(@QueryParameter String regex) {

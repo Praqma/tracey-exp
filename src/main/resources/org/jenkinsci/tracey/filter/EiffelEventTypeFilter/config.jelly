@@ -1,7 +1,0 @@
-<?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
-    <f:entry field="acceptEventTypes">
-        <f:hetero-list descriptors="${descriptor.allOptions()}" items="${instance.acceptEventTypes}" name="acceptEventTypes" oneach="true" hasHeader="true" addCaption="Accept event"/>
-    </f:entry>
-</j:jelly>

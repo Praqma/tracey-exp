@@ -11,7 +11,7 @@ import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQConnection;
 import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQDefaults;
 import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQRoutingInfo;
 import net.praqma.tracey.broker.impl.rabbitmq.TraceyRabbitMQSenderImpl;
-import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter;
+import org.jenkinsci.tracey.filter.TraceyPayloadRegexFilter;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,8 +28,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 public class JenkinsTriggerTest {
-
-
 
     // Defaults
     private String exchange = "tracey";
@@ -92,7 +90,7 @@ public class JenkinsTriggerTest {
         UsernamePasswordCredentialsImpl creds = createCredentials();
         FreeStyleProject p = createAndConfigureProject(r, "Test_Ignore_PayloadFilter", creds);
 
-        TraceyFilter tf = new EiffelPayloadRegexFilter(".*KEYWORD.*");
+        TraceyFilter tf = new TraceyPayloadRegexFilter(".*KEYWORD.*");
 
         TraceyTrigger tt = new TraceyTrigger(exchange, creds.getId(), false, false, envKey, Arrays.asList(tf));
         p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
@@ -119,7 +117,7 @@ public class JenkinsTriggerTest {
         UsernamePasswordCredentialsImpl creds = createCredentials();
         FreeStyleProject p = createAndConfigureProject(r, "Test_Accept_MultilineRegex", creds);
 
-        TraceyFilter tf = new EiffelPayloadRegexFilter("(.*)EiffelSourceChangeCreatedEvent(.*)");
+        TraceyFilter tf = new TraceyPayloadRegexFilter("(.*)EiffelSourceChangeCreatedEvent(.*)");
         assertNotNull("The post recieve hook should not reject this payload", tf.postReceive(contents));
         assertNull("This payload should be ignored", tf.postReceive("(.*)Mads(.*)"));
 
