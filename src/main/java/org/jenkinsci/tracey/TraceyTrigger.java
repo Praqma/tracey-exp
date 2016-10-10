@@ -27,7 +27,9 @@ import net.praqma.tracey.broker.impl.rabbitmq.RabbitMQRoutingInfo;
 import net.praqma.tracey.broker.impl.rabbitmq.TraceyRabbitMQBrokerImpl;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.tracey.filter.EiffelPayloadRegexFilter.EiffelPayloadRegexFilterDescriptor;
+import org.jenkinsci.tracey.filter.PayloadJSONBasicFilter;
+import org.jenkinsci.tracey.filter.PayloadJSONRegexFilter;
+import org.jenkinsci.tracey.filter.TraceyPayloadRegexFilter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -47,7 +49,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
     private String exchange = RabbitMQDefaults.EXCHANGE_NAME;
     private String type = RabbitMQDefaults.EXCHANGE_TYPE;
-    private String consumerTag; //???
+    private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
     private transient RabbitMQRoutingInfo info;
 
@@ -58,7 +60,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     private boolean injectEnvironment = false;
     private boolean gitReady;
 
-    //Post recieve fileters
+    //Post receive filters
     private List<TraceyFilter> filters = new ArrayList<>();
     private String regexToEnv;
 
@@ -78,13 +80,6 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey, filters);
         LOG.info(tbs.toString());
-        if(filters != null) {
-            LOG.info(String.format("Filters for job %s", project.getName()));
-            for(TraceyFilter ft : filters) {
-                LOG.info(ft.getClass().getSimpleName());
-            }
-            broker.getReceiver().getFilters().addAll(filters);
-        }
         broker.getReceiver().setHandler(tbs);
 
         try {
@@ -255,6 +250,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
      * @return the filters
      */
     public List<TraceyFilter> getFilters() {
+        LOG.info(String.format("Get filters: %s", filters.toString()));
         return filters;
     }
 
@@ -320,7 +316,9 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         public static List<Descriptor> getFilters() {
             List<Descriptor> descriptorz = new ArrayList<>();
-            descriptorz.add(Jenkins.getInstance().getDescriptorByType(EiffelPayloadRegexFilterDescriptor.class));
+            descriptorz.add(Jenkins.getInstance().getDescriptorByType(TraceyPayloadRegexFilter.PayloadRegexFilterDescriptor.class));
+            descriptorz.add(Jenkins.getInstance().getDescriptorByType(PayloadJSONBasicFilter.PayloadJSONBasicFilterDescriptor.class));
+            descriptorz.add(Jenkins.getInstance().getDescriptorByType(PayloadJSONRegexFilter.PayloadJSONRegexFilterDescriptor.class));
             return descriptorz;
         }
 

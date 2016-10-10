@@ -1,0 +1,10 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
+         <f:entry field="key" title="Name">
+            <f:textbox default="${descriptor.DEFAULT_KEY}"/>
+        </f:entry>
+        <f:entry field="value" title="Value">
+            <f:textbox default="${descriptor.DEFAULT_VALUE}"/>
+        </f:entry>
+</j:jelly>
