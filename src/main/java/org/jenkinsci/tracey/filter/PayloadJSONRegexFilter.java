@@ -15,8 +15,8 @@ public class PayloadJSONRegexFilter extends net.praqma.tracey.broker.impl.filter
     private static final Logger LOG = Logger.getLogger(PayloadJSONRegexFilter.class.getName());
 
     @DataBoundConstructor
-    public PayloadJSONRegexFilter(String key, String value) {
-        super(key, value);
+    public PayloadJSONRegexFilter(String pattern) {
+        super(pattern);
     }
 
     @Override
