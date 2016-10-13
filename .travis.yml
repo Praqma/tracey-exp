@@ -9,4 +9,4 @@ cache:
   - $HOME/.m2
 
 script:
-  - mvn --quiet package
+  - mvn package |  egrep -v 'Download(ing|ed)'
