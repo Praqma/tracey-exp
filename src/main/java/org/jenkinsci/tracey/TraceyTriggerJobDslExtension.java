@@ -37,9 +37,8 @@ public class TraceyTriggerJobDslExtension extends ContextExtensionPoint {
     public Object tracey(String exchange, String hostId, Closure closure) {
         TraceyTriggerJobDslContext context = new TraceyTriggerJobDslContext();
         if(closure!= null) executeInContext(closure, context);
-        TraceyTrigger trigger = new TraceyTrigger(exchange, hostId,
+        RabbitMQTrigger trigger = new RabbitMQTrigger(exchange, hostId,
                 context.injectEnvironment,
-                context.injectGitVariables,
                 context.envKey,
                 context.filters);
         trigger.setRegexToEnv(context.payloadInjection);

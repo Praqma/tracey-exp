@@ -4,8 +4,9 @@ import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.listeners.ItemListener;
 import hudson.triggers.Trigger;
-import java.util.logging.Logger;
 import jenkins.model.ParameterizedJobMixIn;
+
+import java.util.logging.Logger;
 
 
 @Extension
@@ -19,10 +20,10 @@ public class TraceyItemListener extends ItemListener {
         if(item instanceof ParameterizedJobMixIn.ParameterizedJob) {
             ParameterizedJobMixIn.ParameterizedJob mixin = (ParameterizedJobMixIn.ParameterizedJob)item;
             for(Trigger<?> t :  mixin.getTriggers().values()) {
-                if(t instanceof TraceyTrigger) {
-                    TraceyTrigger tt = (TraceyTrigger)t;
+                if(t instanceof RabbitMQTrigger) {
+                    RabbitMQTrigger tt = (RabbitMQTrigger)t;
                     tt.stop();
-                    LOG.info(String.format("Stopped TraceyTrigger for job: %s", mixin.getName()));
+                    LOG.info(String.format("Stopped RabbitMQTrigger for job: %s", mixin.getName()));
                 }
             }
         }

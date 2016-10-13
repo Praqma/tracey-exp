@@ -1,0 +1,21 @@
+<div>
+    This is where you define your custom injections. The rules are as follows
+    <ul>
+        <li>Each line represents an extraction</li>
+        <li>Each line must conform to the rule of KEY REGEX. There must be a space between the extraction key, and the regex. I.e <em>MYVALUE car=(\S+)</em></li>
+        <li>Plugin will inject one environment variable per capture group and one environment variable that contains the whole selection</li>
+        I.e. Let’s take message below as example:
+            <p>{
+            "commitId": "05e9017c42a7d2a974690f17dcde50d1e2ed86a1",
+            "branch": "master",
+            "repoName": "project",
+            "repoUri": "https://github.com/path-to-project"
+            }</p>
+        if we apply the following extraction
+        <p>BRANCH_FROM_MESSAGE \"branch":\s+\"([^"']+)\"</p>
+        as result we will get two env variables injected:
+        <p>BRANCH_FROM_MESSAGE contains <b>branch = master</b> (the whole match) </p>
+        and
+        <p>BRANCH_FROM_MESSAGE_1 contains <b>master</b> (first match group) </p>
+    </ul>
+</div>

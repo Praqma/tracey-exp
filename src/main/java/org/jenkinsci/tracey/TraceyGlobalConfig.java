@@ -1,19 +1,20 @@
 package org.jenkinsci.tracey;
 
 import hudson.Extension;
-import java.util.List;
 import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.util.List;
+
 @Extension
 public class TraceyGlobalConfig extends GlobalConfiguration {
 
-    private List<TraceyHost> configuredHosts;
+    private List<RabbitMQHost> configuredHosts;
 
     @DataBoundConstructor
-    public TraceyGlobalConfig(List<TraceyHost> configuredHosts) {
+    public TraceyGlobalConfig(List<RabbitMQHost> configuredHosts) {
         this.configuredHosts = configuredHosts;
     }
 
@@ -27,14 +28,14 @@ public class TraceyGlobalConfig extends GlobalConfiguration {
     /**
      * @return the configuredHosts
      */
-    public List<TraceyHost> getConfiguredHosts() {
+    public List<RabbitMQHost> getConfiguredHosts() {
         return configuredHosts;
     }
 
     /**
      * @param configuredHosts the configuredHosts to set
      */
-    public void setConfiguredHosts(List<TraceyHost> configuredHosts) {
+    public void setConfiguredHosts(List<RabbitMQHost> configuredHosts) {
         this.configuredHosts = configuredHosts;
     }
 
@@ -42,8 +43,8 @@ public class TraceyGlobalConfig extends GlobalConfiguration {
         return GlobalConfiguration.all().get(TraceyGlobalConfig.class);
     }
 
-    public static TraceyHost getById(String id) {
-        for(TraceyHost th : get().configuredHosts) {
+    public static RabbitMQHost getById(String id) {
+        for(RabbitMQHost th : get().configuredHosts) {
             if(th.getHostId().equals(id)) {
                 return th;
             }

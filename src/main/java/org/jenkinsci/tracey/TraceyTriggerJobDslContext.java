@@ -14,8 +14,7 @@ import java.util.List;
 public class TraceyTriggerJobDslContext implements Context {
     public List<TraceyFilter> filters = new ArrayList<>();
     public boolean injectEnvironment = false;
-    public boolean injectGitVariables = false;
-    public String envKey = TraceyTrigger.TraceyTriggerDescriptor.DEFAULT_ENV_NAME;
+    public String envKey = RabbitMQTrigger.RabbitMQTriggerDescriptor.DEFAULT_ENV_NAME;
     public String payloadInjection;
 
     /**
@@ -54,7 +53,6 @@ public class TraceyTriggerJobDslContext implements Context {
         if(closure != null) {
             TraceyInjectEnvironmentDslContext context = new TraceyInjectEnvironmentDslContext();
             ContextHelper.executeInContext(closure, context);
-            injectGitVariables = context.injectGitVariables;
             envKey = context.envKey;
             payloadInjection = context.payloadInjection;
         }

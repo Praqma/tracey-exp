@@ -1,15 +1,15 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local" xmlns:c="/lib/credentials">
-    <f:entry field="description" title="Host description">
+    <f:entry field="description" title="Host name">
         <f:textbox/>
     </f:entry>
 
-    <f:entry field="host" title="Host">
+    <f:entry field="host" title="Host address">
         <f:textbox default="${descriptor.DEFAULT_HOST}"/>
     </f:entry>
 
-    <f:entry field="traceyPort" title="Port">
+    <f:entry field="rabbitMQPort" title="Port">
         <f:textbox default="${descriptor.DEFAULT_PORT}"/>
     </f:entry>
 

@@ -25,26 +25,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class TraceyHost implements Describable<TraceyHost> {
+public class RabbitMQHost implements Describable<RabbitMQHost> {
 
     private String host;
     private String credentialId;
     private String description;
     private String hostId;
-    private int traceyPort = RabbitMQDefaults.PORT;//5672
+    private int rabbitMQPort = RabbitMQDefaults.PORT;//5672
 
     @DataBoundConstructor
-    public TraceyHost(String host, String credentialId, String description, int traceyPort, String hostId) {
+    public RabbitMQHost(String host, String credentialId, String description, int rabbitMQPort, String hostId) {
         this.credentialId = credentialId;
         this.host = host;
         this.description = description;
-        this.traceyPort = traceyPort;
+        this.rabbitMQPort = rabbitMQPort;
         this.hostId = hostId;
     }
 
     @Override
-    public Descriptor<TraceyHost> getDescriptor() {
-        return new TraceyHostDescriptor();
+    public Descriptor<RabbitMQHost> getDescriptor() {
+        return new RabbitMQHostDescriptor();
     }
 
     /**
@@ -91,17 +91,17 @@ public class TraceyHost implements Describable<TraceyHost> {
     }
 
     /**
-     * @return the traceyPort
+     * @return the rabbitMQPort
      */
-    public int getTraceyPort() {
-        return traceyPort;
+    public int getRabbitMQPort() {
+        return rabbitMQPort;
     }
 
     /**
-     * @param traceyPort the traceyPort to set
+     * @param rabbitMQPort the rabbitMQPort to set
      */
-    public void setTraceyPort(int traceyPort) {
-        this.traceyPort = traceyPort;
+    public void setRabbitMQPort(int rabbitMQPort) {
+        this.rabbitMQPort = rabbitMQPort;
     }
 
     /**
@@ -120,11 +120,11 @@ public class TraceyHost implements Describable<TraceyHost> {
 
 
     @Extension
-    public static class TraceyHostDescriptor extends Descriptor<TraceyHost> {
+    public static class RabbitMQHostDescriptor extends Descriptor<RabbitMQHost> {
 
         @Override
         public String getDisplayName() {
-            return "Tracey Host";
+            return "RabbitMQ Host";
         }
 
         public static String generateRandomUUID() {

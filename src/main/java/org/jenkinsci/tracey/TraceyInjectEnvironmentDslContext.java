@@ -4,8 +4,7 @@ import javaposse.jobdsl.dsl.Context;
 import org.apache.commons.lang.StringUtils;
 
 public class TraceyInjectEnvironmentDslContext implements Context {
-    public String envKey = TraceyTrigger.TraceyTriggerDescriptor.DEFAULT_ENV_NAME;
-    public boolean injectGitVariables = false;
+    public String envKey = RabbitMQTrigger.RabbitMQTriggerDescriptor.DEFAULT_ENV_NAME;
     public String payloadInjection;
 
     /**
@@ -14,14 +13,6 @@ public class TraceyInjectEnvironmentDslContext implements Context {
      */
     public void payloadKey(String key) {
         envKey = key;
-    }
-
-    /**
-     * Toggles Git variable injection
-     * @param injGit Whether or not to inject Git environment variables
-     */
-    public void injectGitVariables(boolean injGit) {
-        injectGitVariables = injGit;
     }
 
     /**
