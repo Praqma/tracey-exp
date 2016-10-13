@@ -3,6 +3,7 @@ package org.jenkinsci.tracey;
 import javaposse.jobdsl.dsl.Context;
 import net.praqma.tracey.broker.api.TraceyFilter;
 import org.jenkinsci.tracey.filter.PayloadJSONBasicFilter;
+import org.jenkinsci.tracey.filter.PayloadJSONRegexFilter;
 import org.jenkinsci.tracey.filter.TraceyPayloadRegexFilter;
 
 import java.util.ArrayList;
@@ -24,5 +25,5 @@ public class TraceyFilterJobDslContext implements Context {
     public void payloadKeyValue(String key, String value){
         filters.add(new PayloadJSONBasicFilter(key, value));
     }
-
+    public void payloadJSONRegex(String pattern) {filters.add(new PayloadJSONRegexFilter(pattern));}
 }
