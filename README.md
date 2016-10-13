@@ -1,16 +1,16 @@
-## Tracey Jenkins Trigger Plugin
+## Message brokers Jenkins Trigger for Tracey Plugin
 
-This plugin allows you to trigger jobs using [RabbitMQ](https://www.rabbitmq.com/), and also provides additonal integrations to respond to messages in the Eiffel messagaging format. Which is documented [here](https://github.com/Ericsson/eiffel).   
+This plugin allows you to trigger jobs using [RabbitMQ](https://www.rabbitmq.com/).
 
 ### Configuring the trigger
 
-You need to add at least one server. That is done using the global configuration on Jenkins.
+You need to add at least one server. That is done using the global configuration on Jenkins. It is only RabbitMQ host available now
 
-![Global configuration](/docs/images/global-conf.png)
+![Global configuration](/docs/images/global-config.png)
 
-Then you need to enable to tracey trigger on your job
+Then you need to enable RabbitMQ trigger on your job
 
-![Job configuration](/docs/images/trigger-conf.png)
+![Job configuration](/docs/images/trigger.png)
 
 That's it. You're good to go.
 
@@ -21,41 +21,47 @@ You can configure the Tracey trigger using Jenkins Job DSL:
 ```
 job('tracey-job') {
     triggers {
-        tracey('exchangeName', 'tracey-host-id') {
+        tracey('exchangeName', 'rabbitmq-id') {
             injectEnvironment {
                 payloadKey 'MY_PAYLOAD_ENV_KEY'
                 payloadInjection "FOO (foo)*", "BAR [BAR]*"
-                injectGitVariables true
             }
             filters {
                 payloadRegex '\\d{5}'
-                eiffelEventType {
-                    artifactPublished()
-                    sourceChangeCreated()        
-                }
+                payloadKeyValue('name', 'value')
             }
         }
     }
 }
 ```
 
-The tracey host id is the unique identifier assigned to the configured host. You can set this value yourself by expanding the 'Advanced' tab in the host configuration.
+The rabbitmq host id is the unique identifier assigned to the configured host. You can set this value yourself by expanding the 'Advanced' tab in the host configuration.
 
 ### Environment
 
-You can add the content of the recieved message as an environment variable to your build by checking the `Add payload to environment` checkbox. This will unfold two additonal options.
+You can add the content of the received message as an environment variable to your build by checking the `Add payload to environment` checkbox.
 
- - `Inject variables for Git Plugin` _requires an EiffelSourceChangeCreatedEvent type of payload_. See more [here](https://github.com/Ericsson/eiffel/blob/master/eiffel-vocabulary/EiffelSourceChangeCreatedEvent.md)
- 
- - `Add payloads to environemnt`. A list of environment variables to add to the build. Syntax is explained in the help for the input field.
- 
+ - `Environment variable name to store payload` Name of an environment variable to store payload received from the message that triggered this job.
+ - `Regex-based extractions` This is where you define your custom injections. Plugin will inject one environment variable per capture group and one environment variable that contains the whole selection
+     I.e. Let’s take message below as example:
+     `{ "commitId": "05e9017c42a7d2a974690f17dcde50d1e2ed86a1", "branch": "master", "repoName": "project", "repoUri": "https://github.com/path-to-project" }`
+     if we apply the following extraction:
+     `BRANCH_FROM_MESSAGE \"branch":\s+\"([^"']+)\" `
+     as result we will get two env variables injected:
+     `BRANCH_FROM_MESSAGE `contains `branch = master` (the whole match)
+     and
+     `BRANCH_FROM_MESSAGE_1` contains `master` (first match group)
+
 ### Filters
 
-We also provide the option to add filters to the trigger. Currently we have two types of filters. 
+We also provide the option to add filters to the trigger. Currently we have three types of filters.
+![Filters](/docs/images/filters.png)
 
-The first is a `Payload` filter that compares the contents of a message and parses it using the configured regex. If the payload matches the provided regex, then this message triggers the job, otherwise not.  
+The first is a `Payload regex` filter that compares the contents of a message and parses it using the configured regex. If the payload matches the provided regex, then this message triggers the job, otherwise not.
 
-The sencond filter is a `EiffelEventTypeFilter` that looks to see if the message is in the `Eiffel` format. More detail about this format can be found [here](https://github.com/Ericsson/eiffel). 
+The second filter is a `JSON Basic filter` that looks to see if json-format message is match key:value format.
+
+The third filter is a `JSON Regex filter` that looks to see if json-format message is match regex expression. More information you may find [here](https://github.com/jayway/JsonPath)
 
 Filters are applied in order. If one of your choices rejects the payload and the message received, the message will not trigger this project.
 
