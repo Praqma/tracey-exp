@@ -29,6 +29,7 @@ job('tracey-job') {
             filters {
                 payloadRegex '\\d{5}'
                 payloadKeyValue('name', 'value')
+                payloadJSONRegex '$..*[?(@.id == 2)]'
             }
         }
     }
