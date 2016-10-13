@@ -2,19 +2,19 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local" xmlns:c="/lib/credentials">
 
-    <f:entry field="exchange" title="Exchange">
+    <f:entry field="exchange" title="RabbitMQ exchange name">
         <f:textbox default="${descriptor.DEFAULT_EXCHANGE}"/>
     </f:entry>
 
-    <f:entry field="traceyHost" title="Tracey host">
+    <f:entry field="rabbitMQHost" title="RabbitMQ host">
         <f:select/>
     </f:entry>
 
     <f:optionalBlock field="injectEnvironment" title="Add payload to environment" inline="true">
-        <f:entry field="envKey" title="Environment key">
+        <f:entry field="envKey" title="Environment variable name to store payload">
             <f:textbox default="${descriptor.DEFAULT_ENV_NAME}"/>
         </f:entry>
-        <f:entry field="regexToEnv" title="Add payloads to environment">
+        <f:entry field="regexToEnv" title="Regex-based extractions">
             <f:expandableTextbox/>
         </f:entry>
     </f:optionalBlock>

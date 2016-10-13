@@ -33,7 +33,7 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
     public void buildEnvironmentFor(Run r, EnvVars envs, TaskListener listener) throws IOException, InterruptedException {
         super.buildEnvironmentFor(r, envs, listener);
         TraceyAction tAction = r.getAction(TraceyAction.class);
-        TraceyTrigger t = findTriggerForRun(r);
+        RabbitMQTrigger t = findTriggerForRun(r);
         if (t != null) {
             if(tAction == null) {
                 LOG.info(String.format("No action defined for job %s", r.getParent().getName()));
@@ -58,12 +58,12 @@ public class TraceyEnvironmentContributor extends EnvironmentContributor {
     }
 
     @CheckForNull
-    private TraceyTrigger findTriggerForRun(Run r) {
+    private RabbitMQTrigger findTriggerForRun(Run r) {
         if (r.getParent() instanceof ParameterizedJob) {
             ParameterizedJob jobP = (ParameterizedJob)r.getParent();
             for(Trigger<?> trigs : jobP.getTriggers().values()) {
-                if(trigs instanceof TraceyTrigger) {
-                    return (TraceyTrigger)trigs;
+                if(trigs instanceof RabbitMQTrigger) {
+                    return (RabbitMQTrigger)trigs;
                 }
             }
         } else {

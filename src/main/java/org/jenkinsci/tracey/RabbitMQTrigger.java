@@ -44,9 +44,9 @@ import java.util.logging.Logger;
 
 //import org.jenkinsci.tracey.filter.EiffelEventTypeFilter.EiffelEventTypeFilterDescriptor;
 
-public class TraceyTrigger extends Trigger<Job<?,?>> {
+public class RabbitMQTrigger extends Trigger<Job<?,?>> {
 
-    private static final Logger LOG = Logger.getLogger(TraceyTrigger.class.getName());
+    private static final Logger LOG = Logger.getLogger(RabbitMQTrigger.class.getName());
     private String exchange = RabbitMQDefaults.EXCHANGE_NAME;
     private String type = RabbitMQDefaults.EXCHANGE_TYPE;
     private String consumerTag;
@@ -54,11 +54,10 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     private transient RabbitMQRoutingInfo info;
 
     private String envKey = "TRACEY_PAYLOAD";
-    private String traceyHost;
+    private String rabbitMQHost;
 
     //TODO: This should be part of a build wrapper
     private boolean injectEnvironment = false;
-    private boolean gitReady;
 
     //Post receive filters
     private List<TraceyFilter> filters = new ArrayList<>();
@@ -73,7 +72,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     public void start(final Job<?,?> project, boolean newInstance) {
         super.start(project, newInstance);
 
-        broker = configureBroker(project, traceyHost);
+        broker = configureBroker(project, rabbitMQHost);
         info = new RabbitMQRoutingInfo();
         info.setExchangeName(exchange);
         info.setExchangeType(type);
@@ -90,7 +89,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
     }
 
-    private UsernamePasswordCredentials getCredentials(TraceyHost h, Job<?,?> j) {
+    private UsernamePasswordCredentials getCredentials(RabbitMQHost h, Job<?,?> j) {
         UsernamePasswordCredentials upw = null;
         if(h != null) {
             StandardCredentials credentials = CredentialsMatchers.firstOrNull(
@@ -102,7 +101,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     }
 
     private TraceyRabbitMQBrokerImpl configureBroker(Job<?,?> proj, String hid) {
-        TraceyHost th = TraceyGlobalConfig.getById(hid);
+        RabbitMQHost th = TraceyGlobalConfig.getById(hid);
         UsernamePasswordCredentials upw = getCredentials(th, proj);
         String tHost = th.getHost();
 
@@ -147,11 +146,10 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     }
 
     @DataBoundConstructor
-    public TraceyTrigger(String exchange, String traceyHost, boolean injectEnvironment, boolean gitReady, String envKey, List<TraceyFilter> filters) {
+    public RabbitMQTrigger(String exchange, String rabbitMQHost, boolean injectEnvironment, String envKey, List<TraceyFilter> filters) {
         this.exchange = exchange;
-        this.traceyHost = traceyHost;
+        this.rabbitMQHost = rabbitMQHost;
         this.injectEnvironment = injectEnvironment;
-        this.gitReady = gitReady;
         this.envKey = envKey;
         this.filters = filters;
     }
@@ -171,8 +169,8 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     }
 
     @Override
-    public TraceyTriggerDescriptor getDescriptor() {
-        return (TraceyTriggerDescriptor)super.getDescriptor();
+    public RabbitMQTriggerDescriptor getDescriptor() {
+        return (RabbitMQTriggerDescriptor)super.getDescriptor();
     }
 
     /**
@@ -190,17 +188,17 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     }
 
     /**
-     * @return the traceyHost
+     * @return the rabbitMQHost
      */
-    public String getTraceyHost() {
-        return traceyHost;
+    public String getRabbitMQHost() {
+        return rabbitMQHost;
     }
 
     /**
-     * @param traceyHost the traceyHost to set
+     * @param rabbitMQHost the rabbitMQHost to set
      */
-    public void setTraceyHost(String traceyHost) {
-        this.traceyHost = traceyHost;
+    public void setRabbitMQHost(String rabbitMQHost) {
+        this.rabbitMQHost = rabbitMQHost;
     }
 
     /**
@@ -230,20 +228,6 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     @DataBoundSetter
     public void setEnvKey(String envKey) {
         this.envKey = envKey;
-    }
-
-    /**
-     * @return the gitReady
-     */
-    public boolean isGitReady() {
-        return gitReady;
-    }
-
-    /**
-     * @param gitReady the gitReady to set
-     */
-    public void setGitReady(boolean gitReady) {
-        this.gitReady = gitReady;
     }
 
     /**
@@ -277,11 +261,11 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
     }
 
     @Extension
-    public static class TraceyTriggerDescriptor extends TriggerDescriptor {
+    public static class RabbitMQTriggerDescriptor extends TriggerDescriptor {
 
         public static final String DEFAULT_ENV_NAME = "TRACEY_PAYLOAD";
 
-        public TraceyTriggerDescriptor() {
+        public RabbitMQTriggerDescriptor() {
             load();
         }
 
@@ -292,7 +276,7 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
 
         @Override
         public String getDisplayName() {
-            return "Tracey Trigger";
+            return "RabbitMQ Trigger";
         }
 
         @Override
@@ -300,13 +284,13 @@ public class TraceyTrigger extends Trigger<Job<?,?>> {
             return super.newInstance(req, formData); //To change body of generated methods, choose Tools | Templates.
         }
 
-        public ListBoxModel doFillTraceyHostItems() {
+        public ListBoxModel doFillRabbitMQHostItems() {
             ListBoxModel model = new ListBoxModel();
             TraceyGlobalConfig conf = GlobalConfiguration.all().get(TraceyGlobalConfig.class);
             if(conf != null) {
-                List<TraceyHost> hosts = conf.getConfiguredHosts();
+                List<RabbitMQHost> hosts = conf.getConfiguredHosts();
                 if(hosts != null) {
-                    for(TraceyHost th : hosts) {
+                    for(RabbitMQHost th : hosts) {
                         model.add(th.getDescription(), th.getHostId());
                     }
                 }

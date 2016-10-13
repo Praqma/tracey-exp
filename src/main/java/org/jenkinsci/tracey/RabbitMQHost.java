@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-public class TraceyHost implements Describable<TraceyHost> {
+public class RabbitMQHost implements Describable<RabbitMQHost> {
 
     private String host;
     private String credentialId;
@@ -34,7 +34,7 @@ public class TraceyHost implements Describable<TraceyHost> {
     private int traceyPort = RabbitMQDefaults.PORT;//5672
 
     @DataBoundConstructor
-    public TraceyHost(String host, String credentialId, String description, int traceyPort, String hostId) {
+    public RabbitMQHost(String host, String credentialId, String description, int traceyPort, String hostId) {
         this.credentialId = credentialId;
         this.host = host;
         this.description = description;
@@ -43,8 +43,8 @@ public class TraceyHost implements Describable<TraceyHost> {
     }
 
     @Override
-    public Descriptor<TraceyHost> getDescriptor() {
-        return new TraceyHostDescriptor();
+    public Descriptor<RabbitMQHost> getDescriptor() {
+        return new RabbitMQHostDescriptor();
     }
 
     /**
@@ -120,11 +120,11 @@ public class TraceyHost implements Describable<TraceyHost> {
 
 
     @Extension
-    public static class TraceyHostDescriptor extends Descriptor<TraceyHost> {
+    public static class RabbitMQHostDescriptor extends Descriptor<RabbitMQHost> {
 
         @Override
         public String getDisplayName() {
-            return "Tracey Host";
+            return "RabbitMQ Host";
         }
 
         public static String generateRandomUUID() {

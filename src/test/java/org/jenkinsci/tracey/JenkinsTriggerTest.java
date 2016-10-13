@@ -56,7 +56,7 @@ public class JenkinsTriggerTest {
         FreeStyleProject p = r.createFreeStyleProject(jobName);
         ExtensionList<TraceyGlobalConfig> t = r.getInstance().getExtensionList(TraceyGlobalConfig.class);
         TraceyGlobalConfig tgc = t.get(TraceyGlobalConfig.class);
-        TraceyHost th = new TraceyHost(traceyHost, creds.getId(), "Test credential for test", port, "tracey-host-id");
+        RabbitMQHost th = new RabbitMQHost(traceyHost, creds.getId(), "Test credential for test", port, "tracey-host-id");
         tgc.setConfiguredHosts(Arrays.asList(th));
         return p;
     }
@@ -69,8 +69,8 @@ public class JenkinsTriggerTest {
         UsernamePasswordCredentialsImpl creds = createCredentials();
         FreeStyleProject p = createAndConfigureProject(r, "Test_Trigger", creds);
 
-        TraceyTrigger tt = new TraceyTrigger(exchange, creds.getId(), false, false, envKey, Collections.EMPTY_LIST);
-        p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
+        RabbitMQTrigger tt = new RabbitMQTrigger(exchange, creds.getId(), false, envKey, Collections.EMPTY_LIST);
+        p.getTriggers().put(new RabbitMQTrigger.RabbitMQTriggerDescriptor(), tt);
         tt.start(p, true);
 
         TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(new RabbitMQConnection(traceyHost, port, user, password, RabbitMQDefaults.AUTOMATIC_RECOVERY));
@@ -92,8 +92,8 @@ public class JenkinsTriggerTest {
 
         TraceyFilter tf = new TraceyPayloadRegexFilter(".*KEYWORD.*");
 
-        TraceyTrigger tt = new TraceyTrigger(exchange, creds.getId(), false, false, envKey, Arrays.asList(tf));
-        p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
+        RabbitMQTrigger tt = new RabbitMQTrigger(exchange, creds.getId(), false, envKey, Arrays.asList(tf));
+        p.getTriggers().put(new RabbitMQTrigger.RabbitMQTriggerDescriptor(), tt);
         tt.start(p, true);
 
         TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(new RabbitMQConnection(traceyHost, 6666, user, password, RabbitMQDefaults.AUTOMATIC_RECOVERY));
@@ -121,8 +121,8 @@ public class JenkinsTriggerTest {
         assertNotNull("The post recieve hook should not reject this payload", tf.postReceive(contents));
         assertNull("This payload should be ignored", tf.postReceive("(.*)Mads(.*)"));
 
-        TraceyTrigger tt = new TraceyTrigger(exchange, creds.getId(), false, false, envKey, Arrays.asList(tf));
-        p.getTriggers().put(new TraceyTrigger.TraceyTriggerDescriptor(), tt);
+        RabbitMQTrigger tt = new RabbitMQTrigger(exchange, creds.getId(), false, envKey, Arrays.asList(tf));
+        p.getTriggers().put(new RabbitMQTrigger.RabbitMQTriggerDescriptor(), tt);
         tt.start(p, true);
 
         TraceyRabbitMQSenderImpl sender = new TraceyRabbitMQSenderImpl(new RabbitMQConnection(traceyHost, 6666, user, password, RabbitMQDefaults.AUTOMATIC_RECOVERY));
