@@ -31,14 +31,14 @@ public class RabbitMQHost implements Describable<RabbitMQHost> {
     private String credentialId;
     private String description;
     private String hostId;
-    private int traceyPort = RabbitMQDefaults.PORT;//5672
+    private int rabbitMQPort = RabbitMQDefaults.PORT;//5672
 
     @DataBoundConstructor
-    public RabbitMQHost(String host, String credentialId, String description, int traceyPort, String hostId) {
+    public RabbitMQHost(String host, String credentialId, String description, int rabbitMQPort, String hostId) {
         this.credentialId = credentialId;
         this.host = host;
         this.description = description;
-        this.traceyPort = traceyPort;
+        this.rabbitMQPort = rabbitMQPort;
         this.hostId = hostId;
     }
 
@@ -91,17 +91,17 @@ public class RabbitMQHost implements Describable<RabbitMQHost> {
     }
 
     /**
-     * @return the traceyPort
+     * @return the rabbitMQPort
      */
-    public int getTraceyPort() {
-        return traceyPort;
+    public int getRabbitMQPort() {
+        return rabbitMQPort;
     }
 
     /**
-     * @param traceyPort the traceyPort to set
+     * @param rabbitMQPort the rabbitMQPort to set
      */
-    public void setTraceyPort(int traceyPort) {
-        this.traceyPort = traceyPort;
+    public void setRabbitMQPort(int rabbitMQPort) {
+        this.rabbitMQPort = rabbitMQPort;
     }
 
     /**

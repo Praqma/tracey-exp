@@ -101,9 +101,9 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
     }
 
     private TraceyRabbitMQBrokerImpl configureBroker(Job<?,?> proj, String hid) {
-        RabbitMQHost th = TraceyGlobalConfig.getById(hid);
-        UsernamePasswordCredentials upw = getCredentials(th, proj);
-        String tHost = th.getHost();
+        RabbitMQHost rh = TraceyGlobalConfig.getById(hid);
+        UsernamePasswordCredentials upw = getCredentials(rh, proj);
+        String rHost = rh.getHost();
 
         final Jenkins jenkins = Jenkins.getInstance();
         EnvVars env = new EnvVars();
@@ -116,8 +116,8 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
             LOG.log(Level.SEVERE, "InterruptedException caught", ex);
         }
         if(upw != null) {
-            broker = new TraceyRabbitMQBrokerImpl(new RabbitMQConnection(env.expand(tHost),
-                    th.getTraceyPort(),
+            broker = new TraceyRabbitMQBrokerImpl(new RabbitMQConnection(env.expand(rHost),
+                    rh.getRabbitMQPort(),
                     upw.getUsername(),
                     Secret.toString(upw.getPassword()),
                     RabbitMQDefaults.AUTOMATIC_RECOVERY),
@@ -290,8 +290,8 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
             if(conf != null) {
                 List<RabbitMQHost> hosts = conf.getConfiguredHosts();
                 if(hosts != null) {
-                    for(RabbitMQHost th : hosts) {
-                        model.add(th.getDescription(), th.getHostId());
+                    for(RabbitMQHost rh : hosts) {
+                        model.add(rh.getDescription(), rh.getHostId());
                     }
                 }
             }

@@ -5,11 +5,11 @@
         <f:textbox/>
     </f:entry>
 
-    <f:entry field="host" title="Path">
+    <f:entry field="host" title="Host address">
         <f:textbox default="${descriptor.DEFAULT_HOST}"/>
     </f:entry>
 
-    <f:entry field="traceyPort" title="Port">
+    <f:entry field="rabbitMQPort" title="Port">
         <f:textbox default="${descriptor.DEFAULT_PORT}"/>
     </f:entry>
 
