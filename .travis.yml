@@ -9,4 +9,4 @@ cache:
   - $HOME/.m2
 
 script:
-  - MAVEN_OPTS=" -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn ${MAVEN_OPTS}" mvn package
+  - mvn package |  egrep -v ' Download(ing|ed): '
