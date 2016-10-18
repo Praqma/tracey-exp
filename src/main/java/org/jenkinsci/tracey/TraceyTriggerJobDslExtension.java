@@ -15,33 +15,36 @@ public class TraceyTriggerJobDslExtension extends ContextExtensionPoint {
 
     /**
      * Configures a Tracey trigger for a job
-     * @param exchange The exchange to listen to
+     * @param exchangeName The exchangeName to listen to
      * @param hostId The Tracey host name
+     * @param exchangeType Exchange type
      * @return A configured Tracey trigger
      */
     @RequiresPlugin(id = "tracey", minimumVersion = "1.0-SNAPSHOT")
     @DslExtensionMethod(context = TriggerContext.class)
-    public Object tracey(String exchange, String hostId) {
-        return tracey(exchange, hostId, null);
+    public Object tracey(String exchangeName, String hostId, String exchangeType) {
+        return tracey(exchangeName, hostId, exchangeType, null);
     }
 
     /**
      * Configures a Tracey trigger for a job
-     * @param exchange The exchange to listen to
+     * @param exchangeName The exchange to listen to
      * @param hostId The Tracey host name
+     * @param exchangeType Exchange type
      * @param closure Closure containing Tracey trigger configuration
      * @return A configured Tracey trigger
      */
     @RequiresPlugin(id = "tracey", minimumVersion = "1.0-SNAPSHOT")
     @DslExtensionMethod(context = TriggerContext.class)
-    public Object tracey(String exchange, String hostId, Closure closure) {
+    public Object tracey(String exchangeName, String hostId, String exchangeType, Closure closure) {
         TraceyTriggerJobDslContext context = new TraceyTriggerJobDslContext();
         if(closure!= null) executeInContext(closure, context);
-        RabbitMQTrigger trigger = new RabbitMQTrigger(exchange, hostId,
+        RabbitMQTrigger trigger = new RabbitMQTrigger(exchangeName, hostId,
                 context.injectEnvironment,
                 context.envKey,
                 context.filters);
         trigger.setRegexToEnv(context.payloadInjection);
+        trigger.setExchangeType(exchangeType);
         return trigger;
     }
 }
