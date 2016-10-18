@@ -2,7 +2,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local" xmlns:c="/lib/credentials">
 
-    <f:entry field="exchange" title="RabbitMQ exchange name">
+    <f:entry field="exchangeName" title="RabbitMQ exchange name">
         <f:textbox default="${descriptor.DEFAULT_EXCHANGE}"/>
     </f:entry>
 
@@ -10,7 +10,7 @@
         <f:select/>
     </f:entry>
 
-    <f:entry title="Exchange Type" field="exchangeType">
+    <f:entry title="RabbitMQ exchange type" field="exchangeType">
       <select name="exchangeType">
               <f:option value="topic" selected="${instance.exchangeType=='topic'}">topic</f:option>
               <f:option value="direct" selected="${instance.exchangeType=='direct'}">direct</f:option>
