@@ -10,6 +10,15 @@
         <f:select/>
     </f:entry>
 
+    <f:entry title="Exchange Type" field="exchangeType">
+      <select name="exchangeType">
+              <f:option value="topic" selected="${instance.exchangeType=='topic'}">topic</f:option>
+              <f:option value="direct" selected="${instance.exchangeType=='direct'}">direct</f:option>
+              <f:option value="fanout" selected="${instance.exchangeType=='fanout'}">fanout</f:option>
+              <f:option value="headers" selected="${instance.exchangeType=='headers'}">headers</f:option>
+      </select>
+    </f:entry>
+
     <f:optionalBlock field="injectEnvironment" title="Add payload to environment" inline="true">
         <f:entry field="envKey" title="Environment variable name to store payload">
             <f:textbox default="${descriptor.DEFAULT_ENV_NAME}"/>

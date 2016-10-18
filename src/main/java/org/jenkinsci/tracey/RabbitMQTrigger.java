@@ -42,13 +42,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-//import org.jenkinsci.tracey.filter.EiffelEventTypeFilter.EiffelEventTypeFilterDescriptor;
-
 public class RabbitMQTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(RabbitMQTrigger.class.getName());
     private String exchange = RabbitMQDefaults.EXCHANGE_NAME;
-    private String type = RabbitMQDefaults.EXCHANGE_TYPE;
+    private String exchangeType = RabbitMQDefaults.EXCHANGE_TYPE;
     private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
     private transient RabbitMQRoutingInfo info;
@@ -75,7 +73,7 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
         broker = configureBroker(project, rabbitMQHost);
         info = new RabbitMQRoutingInfo();
         info.setExchangeName(exchange);
-        info.setExchangeType(type);
+        info.setExchangeType(exchangeType);
 
         TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey, filters);
         LOG.info(tbs.toString());
@@ -258,6 +256,14 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
     @DataBoundSetter
     public void setRegexToEnv(String regexToEnv) {
         this.regexToEnv = regexToEnv;
+    }
+
+    public String getExchangeType() {
+        return exchangeType;
+    }
+    @DataBoundSetter
+    public void setExchangeType(String exchangeType) {
+        this.exchangeType = exchangeType;
     }
 
     @Extension
