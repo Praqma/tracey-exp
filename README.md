@@ -1,4 +1,4 @@
-## Message brokers Jenkins Trigger for Tracey Plugin
+## RabbitMQ Jenkins Trigger for Tracey
 
 This plugin allows you to trigger jobs using [RabbitMQ](https://www.rabbitmq.com/).
 
@@ -21,7 +21,7 @@ You can configure the Tracey trigger using Jenkins Job DSL:
 ```
 job('tracey-job') {
     triggers {
-        tracey('exchangeName', 'rabbitmq-id', 'exchangeType') {
+        tracey('exchangeName', 'exchangeType', 'rabbitmq-id') {
             injectEnvironment {
                 payloadKey 'MY_PAYLOAD_ENV_KEY'
                 payloadInjection "FOO (foo)*", "BAR [BAR]*"

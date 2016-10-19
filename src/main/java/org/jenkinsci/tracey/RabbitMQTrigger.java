@@ -304,6 +304,15 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
             return model;
         }
 
+        public ListBoxModel doFillExchangeTypeItems() {
+            ListBoxModel model = new ListBoxModel();
+            model.add("topic", "topic");
+            model.add("direct", "direct");
+            model.add("fanout", "fanout");
+            model.add("headers", "headers");
+            return model;
+        }
+
         public static List<Descriptor> getFilters() {
             List<Descriptor> descriptorz = new ArrayList<>();
             descriptorz.add(Jenkins.getInstance().getDescriptorByType(TraceyPayloadRegexFilter.PayloadRegexFilterDescriptor.class));
