@@ -232,7 +232,6 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
      * @return the filters
      */
     public List<TraceyFilter> getFilters() {
-        LOG.info(String.format("Get filters: %s", filters.toString()));
         return filters;
     }
 
