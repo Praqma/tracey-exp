@@ -21,7 +21,7 @@ You can configure the Tracey trigger using Jenkins Job DSL:
 ```
 job('tracey-job') {
     triggers {
-        tracey('exchangeName', 'exchangeType', 'rabbitmq-id') {
+        tracey('exchangeName', 'rabbitmq-id', 'exchangeType') {
             injectEnvironment {
                 payloadKey 'MY_PAYLOAD_ENV_KEY'
                 payloadInjection "FOO (foo)*", "BAR [BAR]*"
