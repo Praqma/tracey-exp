@@ -144,8 +144,8 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
     }
 
     @DataBoundConstructor
-    public RabbitMQTrigger(String exchange, String rabbitMQHost, boolean injectEnvironment, String envKey, List<TraceyFilter> filters) {
-        this.exchangeName = exchange;
+    public RabbitMQTrigger(String exchangeName, String rabbitMQHost, boolean injectEnvironment, String envKey, List<TraceyFilter> filters) {
+        this.exchangeName = exchangeName;
         this.rabbitMQHost = rabbitMQHost;
         this.injectEnvironment = injectEnvironment;
         this.envKey = envKey;
