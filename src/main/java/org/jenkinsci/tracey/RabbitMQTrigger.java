@@ -42,13 +42,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-//import org.jenkinsci.tracey.filter.EiffelEventTypeFilter.EiffelEventTypeFilterDescriptor;
-
 public class RabbitMQTrigger extends Trigger<Job<?,?>> {
 
     private static final Logger LOG = Logger.getLogger(RabbitMQTrigger.class.getName());
-    private String exchange = RabbitMQDefaults.EXCHANGE_NAME;
-    private String type = RabbitMQDefaults.EXCHANGE_TYPE;
+    private String exchangeName = RabbitMQDefaults.EXCHANGE_NAME;
+    private String exchangeType = RabbitMQDefaults.EXCHANGE_TYPE;
     private String consumerTag;
     private transient TraceyRabbitMQBrokerImpl broker;
     private transient RabbitMQRoutingInfo info;
@@ -74,8 +72,8 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
 
         broker = configureBroker(project, rabbitMQHost);
         info = new RabbitMQRoutingInfo();
-        info.setExchangeName(exchange);
-        info.setExchangeType(type);
+        info.setExchangeName(exchangeName);
+        info.setExchangeType(exchangeType);
 
         TraceyBuildStarter tbs = new TraceyBuildStarter(project, envKey, filters);
         LOG.info(tbs.toString());
@@ -147,7 +145,7 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
 
     @DataBoundConstructor
     public RabbitMQTrigger(String exchange, String rabbitMQHost, boolean injectEnvironment, String envKey, List<TraceyFilter> filters) {
-        this.exchange = exchange;
+        this.exchangeName = exchange;
         this.rabbitMQHost = rabbitMQHost;
         this.injectEnvironment = injectEnvironment;
         this.envKey = envKey;
@@ -155,17 +153,17 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
     }
 
     /**
-     * @return the exchange
+     * @return the exchangeName
      */
-    public String getExchange() {
-        return exchange;
+    public String getExchangeName() {
+        return exchangeName;
     }
 
     /**
-     * @param exchange the exchange to set
+     * @param exchangeName the exchangeName to set
      */
-    public void setExchange(String exchange) {
-        this.exchange = exchange;
+    public void setExchangeName(String exchangeName) {
+        this.exchangeName = exchangeName;
     }
 
     @Override
@@ -258,6 +256,14 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
     @DataBoundSetter
     public void setRegexToEnv(String regexToEnv) {
         this.regexToEnv = regexToEnv;
+    }
+
+    public String getExchangeType() {
+        return exchangeType;
+    }
+    @DataBoundSetter
+    public void setExchangeType(String exchangeType) {
+        this.exchangeType = exchangeType;
     }
 
     @Extension
