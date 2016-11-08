@@ -39,10 +39,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RabbitMQTrigger extends Trigger<Job<?,?>> {
+
+    private static Map<String, String> consumerTagCache = new ConcurrentHashMap<>();
 
     private static final Logger LOG = Logger.getLogger(RabbitMQTrigger.class.getName());
     private String exchangeName = RabbitMQDefaults.EXCHANGE_NAME;
@@ -70,6 +74,9 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
     public void start(final Job<?,?> project, boolean newInstance) {
         super.start(project, newInstance);
 
+        LOG.log(Level.INFO, String.format("[%s] Starting %s#%d trigger / job %s",
+            Thread.currentThread().getName(), getDescriptor().getDisplayName(), hashCode(), project.getName()));
+
         broker = configureBroker(project, rabbitMQHost);
         info = new RabbitMQRoutingInfo();
         info.setExchangeName(exchangeName);
@@ -81,6 +88,11 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
 
         try {
             consumerTag = broker.receive(info);
+            String existedTag = consumerTagCache.put(job.getName(), consumerTag);
+            if (existedTag != null) {
+                // stop() method is not executed when job re-generated from DSL
+                cancelConsumer(existedTag);
+            }
         } catch (TraceyIOError ex) {
             LOG.log(Level.SEVERE, "IOError caught", ex);
         }
@@ -99,6 +111,17 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
     }
 
     private TraceyRabbitMQBrokerImpl configureBroker(Job<?,?> proj, String hid) {
+        // this method executed simultaneously from many thread (one per job)
+        synchronized (RabbitMQConnectionHolder.class) {
+            RabbitMQConnection connection = RabbitMQConnectionHolder.getConnection();
+            if (connection == null) {
+                connection = fetchCredentialsAndCreateConnection(proj, hid);
+            }
+            return new TraceyRabbitMQBrokerImpl(connection, filters);
+        }
+    }
+
+    private RabbitMQConnection fetchCredentialsAndCreateConnection(Job<?, ?> proj, String hid) {
         RabbitMQHost rh = TraceyGlobalConfig.getById(hid);
         UsernamePasswordCredentials upw = getCredentials(rh, proj);
         String rHost = rh.getHost();
@@ -113,33 +136,36 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
         } catch (InterruptedException ex) {
             LOG.log(Level.SEVERE, "InterruptedException caught", ex);
         }
-        if(upw != null) {
-            broker = new TraceyRabbitMQBrokerImpl(new RabbitMQConnection(env.expand(rHost),
+
+        if (upw != null) {
+            return RabbitMQConnectionHolder.createConnection(env.expand(rHost),
                     rh.getRabbitMQPort(),
                     upw.getUsername(),
                     Secret.toString(upw.getPassword()),
-                    RabbitMQDefaults.AUTOMATIC_RECOVERY),
-                    filters);
-        } else {
-            broker = new TraceyRabbitMQBrokerImpl(new RabbitMQConnection(RabbitMQDefaults.HOST,
-                                                RabbitMQDefaults.PORT,
-                                                env.expand(RabbitMQDefaults.USERNAME),
-                                                env.expand(RabbitMQDefaults.PASSWORD),
-                                                RabbitMQDefaults.AUTOMATIC_RECOVERY),
-                                                filters);
+                    RabbitMQDefaults.AUTOMATIC_RECOVERY);
         }
-        return broker;
+        return RabbitMQConnectionHolder.createConnection(RabbitMQDefaults.HOST,
+                RabbitMQDefaults.PORT,
+                env.expand(RabbitMQDefaults.USERNAME),
+                env.expand(RabbitMQDefaults.PASSWORD),
+                RabbitMQDefaults.AUTOMATIC_RECOVERY);
     }
 
     @Override
     public void stop() {
+        LOG.log(Level.INFO, String.format("[%s] Stopping %s#%d trigger",
+                Thread.currentThread().getName(), getDescriptor().getDisplayName(), hashCode()));
+        if (broker != null) {
+            consumerTagCache.values().remove(consumerTag);
+            cancelConsumer(consumerTag);
+        }
+    }
+
+    private void cancelConsumer(String consumerTag) {
         try {
-            super.stop();
-            if(broker != null) {
-                broker.getReceiver().cancel(consumerTag);
-            }
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, "Failed to stop consumer", ex);
+            broker.getReceiver().cancel(consumerTag);
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, "Failed to stop consumer: " + e.getMessage());
         }
     }
 
