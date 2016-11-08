@@ -114,11 +114,15 @@ public class RabbitMQTrigger extends Trigger<Job<?,?>> {
         // this method executed simultaneously from many thread (one per job)
         synchronized (RabbitMQConnectionHolder.class) {
             RabbitMQConnection connection = RabbitMQConnectionHolder.getConnection();
-            if (connection == null) {
+            if (connection == null || wasAutoClosed(connection)) {
                 connection = fetchCredentialsAndCreateConnection(proj, hid);
             }
             return new TraceyRabbitMQBrokerImpl(connection, filters);
         }
+    }
+
+    private static boolean wasAutoClosed(RabbitMQConnection connection) {
+        return connection.getChannel() != null && !connection.getChannel().isOpen();
     }
 
     private RabbitMQConnection fetchCredentialsAndCreateConnection(Job<?, ?> proj, String hid) {
