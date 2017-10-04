@@ -3,6 +3,13 @@
 maintainer: andrey9kin, alexsedova
 ---
 
+
+## Usage
+
+Download the snapshot release from Github releases and install it on Jenkins by uploading the hpi file.
+
+Plugin is not yet officially released through the Jenkins CI update center.
+
 ## RabbitMQ Jenkins Trigger for Tracey
 
 This plugin allows you to trigger jobs using [RabbitMQ](https://www.rabbitmq.com/).
@@ -82,3 +89,20 @@ In order to get this up and running:
     docker-compose up
 
 That should do it. Now you have a jenkins running on port 8080, a configured rabbitmq server and a configured job. Login details are (jenkins/demo).
+
+
+## Releasing
+
+To release a new version of this CLI on Github release you need to tag the commit to release. This will be picked up by Travis CI.
+
+### Github auth for Travis release
+
+Release is done a ReleasePraqma user and was securely created using `travis setup releases`
+
+    $ travis setup releases
+    Detected repository as Praqma/tracey-protocol-eiffel-cli-generator, is this correct? |yes| yes
+    Username: ReleasePraqma
+    Password for ReleasePraqma: **********
+    File to Upload: build/libs/tracey-protocol-eiffel-cli-generator.jar
+    Deploy only from Praqma/tracey-protocol-eiffel-cli-generator? |yes| yes
+    Encrypt API key? |yes| yes
