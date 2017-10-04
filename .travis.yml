@@ -1,19 +1,16 @@
 language: java
 jdk:
-  - oraclejdk8
-
+- oraclejdk8
 install: true
-
 cache:
   directories:
-  - $HOME/.m2
-
+  - "$HOME/.m2"
 script:
-  - mvn package |  egrep -v 'Download(ing|ed)'
+- mvn package |  egrep -v 'Download(ing|ed)'
 deploy:
   provider: releases
   api_key:
-    secure: mN85VZBmAb04ma5VSIUi9Sj+Y8PB2W1a3pzFu8E0Jpdzcxs4eKMLjSV+JCaZMy+23GkfEEM4lQ2Xddzf+7/vEP8N2OgWpBp0CriCCzkZvlJaxJErJ3JTCDjyZ0qdXMUYtpk62b9o78pmqzFONRbUEV1bvGCGvf1CFFGoRVvmfIVkmlVLUa6XZ7TosUN+drfbCMXTEwSPqcjaEuAVrzmfmlVDiVlvniTmWNKf0FlYyivTRxbR5TeXz6D4reCDaJ6p9p3HVlNnGvAb9JGzQNty4DJqKnOvvV7J7gT0nthJUZx0GlHTzewm+mpjUMj/tq/BsNwOZPjyxGAbuopDJoBIT7BYB8pOqkaC1DxMA0oXa7AXRE52i8YjBNXvbiv7JjKUzhPvoLEJChkXS4uZyGiRqwtvmtDy6X9b1zgN3BpsmTI6OXP6mF9sCwZ0kY/uowhiO1JEOSmuNL5Al4ceC1yPpzsNt/rqOoYNGMXmFrqve0WnCjqs9DiR8ZYix7y+EJRFyrbJOThiJ60iTbEj1H6iF+EEC192TfnQx0q6n6RkmYkk5C7pB0dMyMcmrLdDictUN1tyUPcUZ6r7UpxDE6U0PBpYHHJ8dYXPlQHl6J1tsfb4O53OBIw3mMlxG08Y1pE/Bk7QkfApIPKm2MNzEW8X4V939lJ3iSww27kWMMxg65o=
+    secure: 0pqSsudLv24VWRHUYbwUaLlim4inXnRd+ZAY+/XZpz51rWvzZpV+H2oXtVYomSUhNlieleYPMx3p0/mpSwOx1xOmG1nww2nPV4IUGN6j1nzvWjHoGj92JLL06OX4EuKQ261xlzBmYaxlGVVpyzIcGxV8zVXYSdmYlwOhoGddZ7TLeXQlWppRszVdfGuWm4naObxJ+14WIjpwSB0M3692iEvXb0f1BAXdA/H21FWTQUkWTHk/v06c/W37J0UzNmYFd+v5HOBEak/tUXQ1Z5XAJ8tH1i2dAAkwjw+aa5Rqz4HTkdbrWJpfECbOdVB3zf2ifvnjC+hjFayWjjjLKnzQ+nxbvyRRxXr+IbaIifiByefZY/ZFqCdlWmlrVHijAP6DBwVAWpGWPuqbeWCTRmN9FoY/mqQGTpes3VzT5Jn+O8f24XrO+fk0pZpxfzSRFG2KxomOogllClLivivz4/vGszO+xGmk37Z1Mt5U5wl+VcE2fyF974APoQHt/NLe7KWZL0rhZCUR/hF55Xoq3gsIiBeIFiKMAxcbYR+/Hh2W7A9+7YwaIwAXT8A6dCXPr1uRfHVVYoYkTszhKnSJzeNnzinmTdFrZN2hpVV66YvSuzkAtN2qP+MqKzYZ2Ah0FdWh+qewuEvmY1VHeJoWWg+acY29rIczeAucR4UzyI0mzrI=
   file: target/tracey.hpi
   skip_cleanup: true
   on:
