@@ -1,8 +1,8 @@
-[![Build Status](https://api.travis-ci.org/Praqma/tracey-jenkins-trigger-plugin.svg?branch=master)](https://travis-ci.org/Praqma/tracey-jenkins-trigger-plugin)
 ---
 maintainer: alexsedova
 ---
 
+[![Build Status](https://api.travis-ci.org/Praqma/tracey-jenkins-trigger-plugin.svg?branch=master)](https://travis-ci.org/Praqma/tracey-jenkins-trigger-plugin)
 
 ## Usage
 
